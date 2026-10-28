@@ -38,7 +38,7 @@ export default function App() {
     }
     return false;
   });
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   // Sync initial URL on mount and handle popstate
   useEffect(() => {
@@ -153,9 +153,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen cyber-grid-bg text-[#D1E7DD] font-sans antialiased flex flex-col relative selection:bg-[#00F29D]/30 selection:text-white">
-      {/* Cinematic Vignette Overlay (pointer-events-none) */}
-      <div className="fixed inset-0 vignette-overlay pointer-events-none z-0" aria-hidden="true" />
+    <div className="app-shell min-h-screen text-slate-700 antialiased flex flex-col relative selection:bg-blue-100 selection:text-slate-900">
 
       {/* Top Navigation */}
       <Navbar
@@ -173,8 +171,8 @@ export default function App() {
       <main className="flex-1 relative z-10">
         {loading ? (
           <div className="flex h-96 items-center justify-center">
-            <div className="flex items-center gap-3 text-xs text-[#7C988B] font-mono">
-              <div className="h-4 w-4 rounded-full border-2 border-[#00F29D] border-t-transparent animate-spin" />
+            <div className="flex items-center gap-3 text-xs text-slate-500">
+            <div className="h-4 w-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
               <span>INITIALIZING SETUP DIRECTORY...</span>
             </div>
           </div>
@@ -195,8 +193,8 @@ export default function App() {
             />
           ) : (
             <div className="flex h-96 items-center justify-center">
-              <div className="flex items-center gap-3 text-xs text-[#7C988B] font-mono">
-                <div className="h-4 w-4 rounded-full border-2 border-[#00F29D] border-t-transparent animate-spin" />
+              <div className="flex items-center gap-3 text-xs text-slate-500">
+                <div className="h-4 w-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
                 <span>RETRIEVING GUIDE TELEMETRY...</span>
               </div>
             </div>
@@ -230,15 +228,15 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#1B382B] bg-[#060B09]/95 backdrop-blur-md py-6 text-center text-xs text-[#7C988B] relative z-10">
+      <footer className="border-t border-slate-200 bg-white/80 py-6 text-center text-xs text-slate-500 relative z-10">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-mono text-[11px] tracking-wide">
-            OAUTH LAUNCH GUIDE <span className="text-[#3B4A40]">/</span> INDEPENDENT SPECIFICATION FOR COMPOSIO DEVELOPERS
+            OAUTH LAUNCH GUIDE <span className="text-slate-300">/</span> INDEPENDENT SPECIFICATION FOR COMPOSIO DEVELOPERS
           </p>
           <div className="flex items-center gap-4 text-[11px]">
-            <span className="text-[#7C988B]">Composio Connect (MCP) & Agent Plugins</span>
-            <span className="text-[#1B382B]">•</span>
-            <button onClick={() => navigateTo('research')} className="text-[#00F29D] hover:underline font-medium">
+            <span className="text-slate-500">Composio Connect (MCP) & Agent Plugins</span>
+            <span className="text-slate-300">•</span>
+            <button onClick={() => navigateTo('research')} className="text-blue-600 hover:underline font-medium">
               Research & Decisions
             </button>
           </div>
