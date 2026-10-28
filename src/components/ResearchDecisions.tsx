@@ -23,7 +23,7 @@ export const ResearchDecisions: React.FC<ResearchDecisionsProps> = ({
   onOpenIntake,
 }) => {
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 text-[#D1E7DD]">
+    <div className="legacy-light-surface mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 text-slate-700">
       {/* Top Header */}
       <div className="mb-8 pb-6 border-b border-[#1B382B]">
         <div className="flex items-center gap-2 mb-2">

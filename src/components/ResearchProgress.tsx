@@ -81,16 +81,16 @@ export const ResearchProgress: React.FC<ResearchProgressProps> = ({
 
   if (error) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12 text-zinc-200">
-        <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-red-200 shadow-xl">
+      <div className="legacy-light-surface mx-auto max-w-3xl px-4 py-12 text-slate-700">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-800 shadow-sm">
           <div className="flex items-center gap-3 mb-2">
             <AlertCircle className="h-6 w-6 text-red-400" />
-            <h2 className="text-base font-bold text-white">Investigation Encountered a Network Error</h2>
+            <h2 className="text-base font-bold text-slate-900">Investigation Encountered a Network Error</h2>
           </div>
-          <p className="text-xs text-red-300 mb-4">{error}</p>
+          <p className="text-xs text-red-700 mb-4">{error}</p>
           <button
             onClick={onRetry}
-            className="inline-flex items-center gap-2 rounded-xl bg-red-500 hover:bg-red-400 px-4 py-2 text-xs font-bold text-black transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-red-600 hover:bg-red-700 px-4 py-2 text-xs font-bold text-white transition"
           >
             <RotateCcw className="h-4 w-4" />
             <span>Retry Research Job</span>
@@ -103,7 +103,7 @@ export const ResearchProgress: React.FC<ResearchProgressProps> = ({
   const currentStageIndex = STAGES.findIndex((s) => s.key === job?.currentStage);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 text-[#D1E7DD]">
+    <div className="legacy-light-surface mx-auto max-w-4xl px-4 sm:px-6 py-8 text-slate-700">
       {/* Top Banner */}
       <div className="mb-6 cyber-panel cyber-highlight-top rounded-2xl p-6 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

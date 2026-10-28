@@ -159,6 +159,103 @@
   color: transparent;
 }
 
+/* Compatibility layer for the result, research, and action-pack views.
+   These views still use legacy utility names, so keep their behavior while
+   mapping the old visual vocabulary onto the shared light system. */
+.cyber-panel,
+.cyber-panel-elevated {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-secondary);
+}
+
+.cyber-highlight-top::before {
+  display: none;
+}
+
+.btn-emerald-glow {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-button);
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.btn-emerald-glow:hover {
+  background: var(--color-primary-hover);
+  box-shadow: 0 8px 18px rgba(53, 99, 246, 0.26);
+}
+
+.btn-cyber-ghost {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn-cyber-ghost:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary-border);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.cyber-input {
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.cyber-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.cyber-input:focus {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px rgba(108, 139, 255, 0.16);
+}
+
+.legacy-light-surface [class*="text-white"] {
+  color: var(--color-text) !important;
+}
+
+.legacy-light-surface [class*="text-[#D1E7DD]"] {
+  color: var(--color-text-secondary) !important;
+}
+
+.legacy-light-surface [class*="text-[#7C988B]"] {
+  color: var(--color-text-muted) !important;
+}
+
+.legacy-light-surface [class*="text-[#00F29D]"] {
+  color: var(--color-primary) !important;
+}
+
+.legacy-light-surface [class*="text-[#00E5FF]"] {
+  color: var(--color-info) !important;
+}
+
+.legacy-light-surface [class*="bg-[#060B09]"],
+.legacy-light-surface [class*="bg-[#0A0F0D]"],
+.legacy-light-surface [class*="bg-[#0E1A14]"],
+.legacy-light-surface [class*="bg-[#102319]"],
+.legacy-light-surface [class*="bg-[#171D1A]"],
+.legacy-light-surface [class*="bg-[#252B29]"] {
+  background: var(--color-surface-subtle) !important;
+}
+
+.legacy-light-surface [class*="border-[#1B382B]"],
+.legacy-light-surface [class*="border-[#3B4A40]"] {
+  border-color: var(--color-border) !important;
+}
+
+.legacy-light-surface [class*="divide-[#1B382B]"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-border) !important;
+}
+
+.legacy-light-surface [class*="ring-[#00F29D]"] {
+  --tw-ring-color: rgba(53, 99, 246, 0.25) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

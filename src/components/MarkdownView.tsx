@@ -161,5 +161,5 @@ export const MarkdownView: React.FC<MarkdownViewProps> = ({ content, className =
 
   flushList('flush-final');
 
-  return <div className={`text-xs space-y-1 ${className}`}>{elements}</div>;
+  return <div className={`legacy-light-surface text-xs space-y-1 ${className}`}>{elements}</div>;
 };

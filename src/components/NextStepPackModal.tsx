@@ -72,9 +72,9 @@ ${pack.warningsAndDisclaimers.map((w) => `- ${w}`).join('\n')}
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/35 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-150">
       <div 
-        className="relative w-full max-w-3xl rounded-2xl cyber-panel-elevated cyber-highlight-top shadow-2xl my-8 flex flex-col max-h-[90vh] text-[#D1E7DD]"
+        className="legacy-light-surface relative w-full max-w-3xl rounded-2xl cyber-panel-elevated cyber-highlight-top shadow-2xl my-8 flex flex-col max-h-[90vh] text-slate-700"
         role="dialog"
         aria-modal="true"
       >

@@ -210,7 +210,7 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
     : extWaitStr.trim() ? extWaitStr.slice(0, 14) : 'Unknown';
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 text-[#D1E7DD]">
+    <div className="legacy-light-surface mx-auto max-w-5xl px-4 sm:px-6 py-6 text-slate-700">
       {/* Top back & actions bar */}
       <div className="mb-5 flex items-center justify-between flex-wrap gap-3">
         <button
