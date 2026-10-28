@@ -1,0 +1,8 @@
+{
+  "name": "OAuth Launch Guide",
+  "description": "Find your OAuth path to launch with Composio. Sourced guides, managed vs owned OAuth assessment, and approval checklists for AI agent integrations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
