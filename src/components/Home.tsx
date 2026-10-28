@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  Sparkles, 
-  Sliders,
-  Search,
-  ArrowRight
-} from 'lucide-react';
+import { CheckCircle2, Sparkles, Sliders } from 'lucide-react';
 import { GuideSummary, GuideAssumptions } from '../types/client.js';
 import { IntakeForm } from './IntakeForm.js';
 import { ChatAssistant } from './ChatAssistant.js';
@@ -18,101 +13,66 @@ interface HomeProps {
   onSubmitIntake?: (provider: string, website: string, assumptions: GuideAssumptions) => void;
 }
 
-export const Home: React.FC<HomeProps> = ({
-  guides,
-  onOpenGuide,
-  onStartSearch,
-  onNavigateToResearch,
-  onSubmitIntake,
-}) => {
+export const Home: React.FC<HomeProps> = ({ guides, onOpenGuide, onStartSearch, onNavigateToResearch, onSubmitIntake }) => {
   const [activeTab, setActiveTab] = useState<'manual' | 'ai_assist'>('manual');
-  const [selectedProviderHint, setSelectedProviderHint] = useState<string>('');
-
-  const handleFormSubmit = (provider: string, website: string, assumptions: GuideAssumptions) => {
-    if (onSubmitIntake) {
-      onSubmitIntake(provider, website, assumptions);
-    } else {
-      onStartSearch(provider);
-    }
-  };
+  const [selectedProviderHint, setSelectedProviderHint] = useState('');
+  const handleFormSubmit = (provider: string, website: string, assumptions: GuideAssumptions) =>
+    onSubmitIntake ? onSubmitIntake(provider, website, assumptions) : onStartSearch(provider);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 text-[#D1E7DD]">
-      {/* Top Banner / Hero matching composio.dev deep-tech developer toolkit */}
-      <div className="text-center max-w-2xl mx-auto mb-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#1B382B] bg-[#0E1A14]/90 px-3.5 py-1 text-[11px] font-mono font-medium text-[#00F29D] shadow-[0_0_15px_rgba(0,242,157,0.1)] mb-3">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#00F29D] shadow-[0_0_8px_#00F29D]" />
-          <span>COMPOSIO DEVELOPER TOOLKIT</span>
+    <div className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <section className="relative mb-10 overflow-hidden rounded-[28px] border border-blue-100 bg-gradient-to-br from-white via-white to-indigo-50/80 px-5 py-10 sm:px-10 lg:px-14">
+        <div className="relative max-w-3xl">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-bold tracking-wide text-indigo-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+            COMPOSIO DEVELOPER TOOLKIT
+          </div>
+          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-slate-900 sm:text-5xl">
+            Find your OAuth <span className="text-gradient">path to launch.</span>
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            Determine whether Composio-managed OAuth fits your use case, or get an owned-app setup &amp; verification guide.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-600">
+            {['Verified provider insights', 'Clear action steps', 'Based on real experience'].map((item) => (
+              <span key={item} className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white tracking-tight leading-tight">
-          Find your OAuth path to launch.
-        </h1>
-        <p className="text-sm sm:text-base text-[#D1E7DD]/90 mt-3 max-w-xl mx-auto leading-relaxed">
-          Determine whether Composio-managed OAuth fits your use case, or get an owned-app setup & verification guide.
-        </p>
-      </div>
+      </section>
 
-      {/* Mode Switcher Tabs: "Manual vs AI Assist" just below hero */}
-      <div className="flex justify-center mb-8">
-        <div className="inline-flex items-center rounded-full bg-[#0A0F0D]/90 border border-[#1B382B] p-1 shadow-lg backdrop-blur-md">
-          <button
-            type="button"
-            onClick={() => setActiveTab('manual')}
-            className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold transition ${
-              activeTab === 'manual'
-                ? 'btn-emerald-glow'
-                : 'text-[#7C988B] hover:text-white hover:bg-[#171D1A]'
-            }`}
-          >
-            <Sliders className="h-3.5 w-3.5" />
-            <span>Manual</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('ai_assist')}
-            className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold transition ${
-              activeTab === 'ai_assist'
-                ? 'btn-emerald-glow'
-                : 'text-[#7C988B] hover:text-white hover:bg-[#171D1A]'
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>AI Assist</span>
-          </button>
+      <section className="site-card rounded-3xl p-4 sm:p-7 lg:p-8">
+        <div className="mb-6 flex flex-col gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><Sparkles className="h-5 w-5" /></span>
+            <div>
+              <h2 className="text-xl font-bold tracking-tight">Investigate OAuth Setup Path</h2>
+              <p className="mt-1 text-sm text-slate-500">Tell our research agent about your target integration, actions, and audience.</p>
+              <span className="mt-3 inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold tracking-wide text-blue-700">COMPOSIO-FIRST ASSESSMENT</span>
+            </div>
+          </div>
+          <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+            {[
+              { id: 'manual' as const, label: 'Manual', icon: Sliders },
+              { id: 'ai_assist' as const, label: 'AI Assist', icon: Sparkles },
+            ].map(({ id, label, icon: Icon }) => (
+              <button key={id} type="button" onClick={() => setActiveTab(id)} className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${activeTab === id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-white'}`}>
+                <Icon className="h-4 w-4" />{label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+        {activeTab === 'manual' ? (
+          <IntakeForm initialProvider={selectedProviderHint} onSubmit={handleFormSubmit} onSelectPreset={setSelectedProviderHint} />
+        ) : (
+          <ChatAssistant onOpenGuide={onOpenGuide} onOpenIntake={(hint) => { setSelectedProviderHint(hint || ''); setActiveTab('manual'); }} />
+        )}
+      </section>
 
-      {/* Tab 1: Manual Intake Form (Main Landing Page) */}
-      {activeTab === 'manual' && (
-        <div className="max-w-2xl mx-auto animate-in fade-in duration-200">
-          <IntakeForm
-            initialProvider={selectedProviderHint}
-            onSubmit={handleFormSubmit}
-            onSelectPreset={(p) => setSelectedProviderHint(p)}
-          />
-        </div>
-      )}
-
-      {/* Tab 2: AI Assist (OAuth Launch Assistant Chat) */}
-      {activeTab === 'ai_assist' && (
-        <div className="max-w-3xl mx-auto animate-in fade-in duration-200">
-          <ChatAssistant
-            onOpenGuide={onOpenGuide}
-            onOpenIntake={(hint) => {
-              setSelectedProviderHint(hint || '');
-              setActiveTab('manual');
-            }}
-          />
-        </div>
-      )}
-
-      {/* Visible Bottom Carousel: Three Carousel Boxes */}
-      <GuidesCarousel
-        guides={guides}
-        onOpenGuide={onOpenGuide}
-        onNavigateToResearch={onNavigateToResearch}
-      />
+      <GuidesCarousel guides={guides} onOpenGuide={onOpenGuide} onNavigateToResearch={onNavigateToResearch} />
     </div>
   );
 };
