@@ -1,10 +1,13 @@
-import { ComposioToolkitMatch } from './types.js';
+import { ComposioToolkitMatch, ComposioLookupOutcome } from './types.js';
 
-export async function inspectComposioToolkit(providerNameOrSlug: string): Promise<{
+export interface InspectToolkitResult {
+  outcome: ComposioLookupOutcome;
   toolkit: ComposioToolkitMatch | null;
   retrievalProvenance: string;
-}> {
-  // Normalize candidate slug
+  errorDetail?: string;
+}
+
+export async function inspectComposioToolkit(providerNameOrSlug: string): Promise<InspectToolkitResult> {
   const cleanSlug = providerNameOrSlug
     .toLowerCase()
     .trim()
@@ -12,6 +15,14 @@ export async function inspectComposioToolkit(providerNameOrSlug: string): Promis
     .replace(/^www\./, '')
     .split('.')[0]
     .replace(/[^a-z0-9_-]/g, '');
+
+  if (!cleanSlug) {
+    return {
+      outcome: 'toolkit_not_found',
+      toolkit: null,
+      retrievalProvenance: 'Invalid or empty provider identifier provided.',
+    };
+  }
 
   const apiKey = process.env.COMPOSIO_API_KEY;
 
@@ -30,24 +41,69 @@ export async function inspectComposioToolkit(providerNameOrSlug: string): Promis
       clearTimeout(timeout);
 
       if (res.ok) {
-        const data = await res.json();
-        const managedSchemes = data.composio_managed_auth_schemes || [];
-        const isManagedOAuth = Array.isArray(managedSchemes) && managedSchemes.some((s: any) => 
-          typeof s === 'string' ? s.toLowerCase().includes('oauth') : s?.auth_mode?.toLowerCase?.().includes('oauth')
-        );
+        let data: any;
+        try {
+          data = await res.json();
+        } catch (jsonErr: any) {
+          return {
+            outcome: 'malformed_metadata',
+            toolkit: null,
+            retrievalProvenance: `API response from GET https://backend.composio.dev/api/v3.1/toolkits/${cleanSlug} was malformed JSON at ${new Date().toISOString()}`,
+            errorDetail: jsonErr?.message,
+          };
+        }
 
-        const actions = Array.isArray(data.actions) 
-          ? data.actions.map((a: any) => a.name || a.slug || a).slice(0, 5)
-          : [`${cleanSlug}_default_action`];
+        if (!data || typeof data !== 'object') {
+          return {
+            outcome: 'malformed_metadata',
+            toolkit: null,
+            retrievalProvenance: `API response missing object body at ${new Date().toISOString()}`,
+          };
+        }
+
+        const managedSchemes = data.composio_managed_auth_schemes;
+        let managedAuthAvailable: 'available' | 'unavailable' | 'unknown' = 'unknown';
+        let outcome: ComposioLookupOutcome = 'ambiguous_config';
+        let relevantAuthMethod = 'OAuth 2.0';
+
+        if (Array.isArray(managedSchemes)) {
+          const hasManagedOAuth = managedSchemes.some((s: any) => {
+            if (typeof s === 'string') return s.toLowerCase().includes('oauth');
+            return s?.auth_mode?.toLowerCase?.().includes('oauth');
+          });
+
+          if (hasManagedOAuth) {
+            managedAuthAvailable = 'available';
+            outcome = 'confirmed_available';
+            relevantAuthMethod = 'OAuth 2.0';
+          } else if (managedSchemes.length === 0) {
+            managedAuthAvailable = 'unavailable';
+            outcome = 'confirmed_unavailable';
+            relevantAuthMethod = 'OAuth 2.0 (Custom App Required)';
+          } else {
+            managedAuthAvailable = 'unavailable';
+            outcome = 'confirmed_unavailable';
+            relevantAuthMethod = 'API Key / Non-OAuth Credentials';
+          }
+        } else {
+          outcome = 'ambiguous_config';
+          managedAuthAvailable = 'unknown';
+        }
+
+        const actions: string[] = Array.isArray(data.actions)
+          ? data.actions.map((a: any) => a?.name || a?.slug || (typeof a === 'string' ? a : '')).filter(Boolean).slice(0, 5)
+          : [];
 
         return {
+          outcome,
           toolkit: {
             found: true,
             slug: cleanSlug,
             name: data.name || `${cleanSlug.charAt(0).toUpperCase() + cleanSlug.slice(1)} Toolkit`,
             docUrl: `https://docs.composio.dev/toolkits/${cleanSlug}`,
-            managedAuthAvailable: isManagedOAuth ? 'available' : (managedSchemes.length > 0 ? 'available' : 'unavailable'),
-            relevantAuthMethod: 'OAuth 2.0',
+            managedAuthAvailable,
+            lookupOutcome: outcome,
+            relevantAuthMethod,
             metadataStatus: 'api_checked',
             limitationsDocumented: [
               'Retrieved directly from Composio v3.1 metadata API.',
@@ -58,13 +114,20 @@ export async function inspectComposioToolkit(providerNameOrSlug: string): Promis
           },
           retrievalProvenance: `API checked: GET https://backend.composio.dev/api/v3.1/toolkits/${cleanSlug} at ${new Date().toISOString()}`,
         };
+      } else if (res.status !== 404) {
+        return {
+          outcome: 'network_error',
+          toolkit: null,
+          retrievalProvenance: `API call to Composio v3.1 returned HTTP ${res.status} ${res.statusText} at ${new Date().toISOString()}`,
+          errorDetail: `HTTP ${res.status}`,
+        };
       }
-    } catch (e) {
-      console.warn('Composio API fetch failed or timed out:', e);
+    } catch (apiErr: any) {
+      console.warn('Composio API fetch failed or timed out:', apiErr?.message);
     }
   }
 
-  // 2. Public documentation retrieval against official Composio docs (e.g. Linear, Airtable, Slack, Spotify, Xero, etc.)
+  // 2. Public documentation retrieval against official Composio docs
   try {
     const docUrl = `https://docs.composio.dev/toolkits/${cleanSlug}`;
     const controller = new AbortController();
@@ -82,7 +145,7 @@ export async function inspectComposioToolkit(providerNameOrSlug: string): Promis
     if (docRes.status === 200) {
       const html = await docRes.text();
 
-      // Extract action names if present in the page content or embedded JSON
+      // Extract real action names if present in the page content
       const actionsFound: string[] = [];
       const actionRegex = new RegExp(`["'](${cleanSlug}_[a-z0-9_]+)["']`, 'gi');
       let match;
@@ -93,101 +156,93 @@ export async function inspectComposioToolkit(providerNameOrSlug: string): Promis
       }
 
       const toolkitName = cleanSlug.charAt(0).toUpperCase() + cleanSlug.slice(1);
+      const lowerHtml = html.toLowerCase();
 
-      // Locate "Authentication Details" section
-      const authIdx = html.indexOf('Authentication Details');
+      // Check explicit negation badges
+      const hasExplicitNegation =
+        lowerHtml.includes('composio-managed oauth not available') ||
+        lowerHtml.includes('managed oauth not available') ||
+        lowerHtml.includes('why is there no default oauth app') ||
+        lowerHtml.includes('composio does not provide a default oauth app') ||
+        lowerHtml.includes('create your own oauth app in');
+
+      // Check explicit positive badges
+      const hasExplicitPositive =
+        lowerHtml.includes('composio-managed oauth available') ||
+        lowerHtml.includes('managed oauth is available') ||
+        lowerHtml.includes('connect with managed oauth') ||
+        lowerHtml.includes('use composio default oauth');
+
       let managedAuthAvailable: 'available' | 'unavailable' | 'unknown' = 'unknown';
+      let outcome: ComposioLookupOutcome = 'ambiguous_config';
       let relevantAuthMethod = 'OAuth 2.0';
-      const limitations: string[] = [`Verified via Composio documentation at ${docUrl}.`];
+      const limitations: string[] = [`Inspected Composio documentation at ${docUrl}.`];
 
-      if (authIdx !== -1) {
-        // Inspect the immediate 800 characters following "Authentication Details" header
-        const authSection = html.substring(authIdx, authIdx + 800);
-        
-        // Exact badge check: Look for amber negation badge:
-        // e.g. 'Composio-managed OAuth not available'
-        const hasManagedNotAvailableBadge = 
-          authSection.toLowerCase().includes('composio-managed oauth not available') ||
-          authSection.toLowerCase().includes('managed oauth not available') ||
-          html.includes('Why is there no default OAuth app') ||
-          html.includes('Composio does not provide a default OAuth app');
-
-        if (hasManagedNotAvailableBadge) {
-          managedAuthAvailable = 'unavailable';
-          relevantAuthMethod = 'OAuth 2.0 (Custom App Required)';
-          limitations.push(
-            'Composio-managed OAuth is explicitly NOT available for this toolkit.',
-            'You must register your own OAuth app in the provider developer dashboard and configure custom credentials in Composio.',
-          );
-        } else {
-          // If no negation badge exists and OAuth 2.0 is supported:
-          const mentionsOAuth = 
-            authSection.toLowerCase().includes('oauth') || 
-            html.toLowerCase().includes('oauth 2.0') ||
-            html.includes('/docs/authentication');
-
-          if (mentionsOAuth) {
-            managedAuthAvailable = 'available';
-            relevantAuthMethod = 'OAuth 2.0';
-            limitations.push(
-              'Managed OAuth displays Composio branding on the provider consent screen.',
-              'For custom branding or dedicated quotas, configure an owned app using the Redirect URI from your Composio auth configuration.',
-            );
-          } else {
-            // Might be API key or basic auth
-            managedAuthAvailable = 'unavailable';
-            relevantAuthMethod = authSection.toLowerCase().includes('api key') ? 'API Key' : 'Custom Credentials';
-            limitations.push('Toolkit uses non-OAuth or custom credential authentication.');
-          }
-        }
+      if (hasExplicitNegation) {
+        managedAuthAvailable = 'unavailable';
+        outcome = 'confirmed_unavailable';
+        relevantAuthMethod = 'OAuth 2.0 (Custom App Required)';
+        limitations.push(
+          'Composio-managed OAuth is explicitly NOT available for this toolkit.',
+          'You must register your own OAuth app in the provider developer dashboard and configure custom credentials in Composio.'
+        );
+      } else if (hasExplicitPositive) {
+        managedAuthAvailable = 'available';
+        outcome = 'confirmed_available';
+        relevantAuthMethod = 'OAuth 2.0';
+        limitations.push(
+          'Managed OAuth displays Composio branding on the provider consent screen.',
+          'For custom branding or dedicated quotas, configure an owned app in Composio custom app settings.'
+        );
       } else {
-        // "Authentication Details" header was not found in HTML - preserve unknown
+        // Ambiguous: DO NOT guess! The presence of "oauth" in the text does NOT mean managed OAuth is available.
         managedAuthAvailable = 'unknown';
-        limitations.push('Authentication Details section was not identified in documentation; managed status is unknown.');
+        outcome = 'ambiguous_config';
+        relevantAuthMethod = lowerHtml.includes('api key') ? 'API Key / Unknown OAuth' : 'OAuth 2.0 (Unconfirmed Managed Support)';
+        limitations.push(
+          'Documentation mentions the toolkit, but does not explicitly confirm whether a Composio-managed OAuth app is provisioned.',
+          'Check your Composio dashboard under Integrations to verify if a default connection mode is enabled.'
+        );
       }
 
       return {
+        outcome,
         toolkit: {
           found: true,
           slug: cleanSlug,
           name: `${toolkitName} Toolkit`,
           docUrl,
           managedAuthAvailable,
+          lookupOutcome: outcome,
           relevantAuthMethod,
           metadataStatus: 'documentation_checked',
           limitationsDocumented: limitations,
-          supportedActionsSummary: actionsFound.length > 0 
-            ? actionsFound 
-            : [`${cleanSlug}_read`, `${cleanSlug}_write`],
+          supportedActionsSummary: actionsFound,
           customAuthDocUrl: 'https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app',
         },
-        retrievalProvenance: `Documentation checked: GET ${docUrl} (managed auth status: ${managedAuthAvailable}) at ${new Date().toISOString()}`,
+        retrievalProvenance: `Documentation checked: GET ${docUrl} (outcome: ${outcome}, managed status: ${managedAuthAvailable}) at ${new Date().toISOString()}`,
       };
     } else if (docRes.status === 404) {
       return {
+        outcome: 'toolkit_not_found',
         toolkit: null,
         retrievalProvenance: `Documentation checked: GET ${docUrl} returned 404 Not Found at ${new Date().toISOString()}`,
+      };
+    } else {
+      return {
+        outcome: 'network_error',
+        toolkit: null,
+        retrievalProvenance: `Documentation request to ${docUrl} returned HTTP ${docRes.status} at ${new Date().toISOString()}`,
+        errorDetail: `HTTP ${docRes.status}`,
       };
     }
   } catch (err: any) {
     console.warn(`Documentation check for "${cleanSlug}" encountered network error:`, err?.message);
     return {
-      toolkit: {
-        found: false,
-        slug: cleanSlug,
-        managedAuthAvailable: 'unknown',
-        relevantAuthMethod: 'OAuth 2.0',
-        metadataStatus: 'unverified',
-        limitationsDocumented: ['Composio documentation could not be reached; availability is unknown.'],
-        supportedActionsSummary: [],
-      },
+      outcome: 'network_error',
+      toolkit: null,
       retrievalProvenance: `Documentation check attempted at https://docs.composio.dev/toolkits/${cleanSlug} but network request failed: ${err?.message || 'timeout'}`,
+      errorDetail: err?.message || 'Network connection failed or timed out',
     };
   }
-
-  // Fallback
-  return {
-    toolkit: null,
-    retrievalProvenance: `Documentation checked: No toolkit identified for slug "${cleanSlug}" at https://docs.composio.dev/toolkits/${cleanSlug}`,
-  };
 }

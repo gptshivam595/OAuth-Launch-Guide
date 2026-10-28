@@ -134,13 +134,18 @@ export const ResearchProgress: React.FC<ResearchProgressProps> = ({
           )}
 
           {job?.status === 'failed' && (
-            <button
-              onClick={onRetry}
-              className="inline-flex items-center gap-2 rounded-full btn-cyber-ghost px-5 py-2 text-xs font-semibold text-white transition shrink-0"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span>Retry Investigation</span>
-            </button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <span className="text-xs text-red-300 font-mono bg-red-950/40 px-3 py-1.5 rounded-lg border border-red-500/30">
+                {job.error || 'Investigation halted.'}
+              </span>
+              <button
+                onClick={onRetry}
+                className="inline-flex items-center gap-2 rounded-full btn-cyber-ghost px-5 py-2 text-xs font-semibold text-white transition shrink-0 cursor-pointer"
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span>Retry Investigation</span>
+              </button>
+            </div>
           )}
         </div>
       </div>

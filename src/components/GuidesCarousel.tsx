@@ -107,6 +107,7 @@ export const GuidesCarousel: React.FC<GuidesCarouselProps> = ({
           {currentGuides.map((g) => {
             const isComposioManaged = g.startingPath === 'composio_managed_suitable';
             const isOwnedApp = g.startingPath === 'register_owned_app';
+            const isUnverified = g.startingPath === 'unverified_provider_requirements';
 
             return (
               <div
@@ -132,12 +133,15 @@ export const GuidesCarousel: React.FC<GuidesCarouselProps> = ({
                           ? 'bg-[#00F29D]/15 text-[#00F29D] border border-[#00F29D]/30'
                           : isOwnedApp
                           ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30'
+                          : isUnverified
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                           : 'bg-[#171D1A] text-[#7C988B] border border-[#1B382B]'
                       }`}
                     >
                       {isComposioManaged && 'Composio-Managed Suitable'}
                       {isOwnedApp && 'Owned App Advised'}
-                      {!isComposioManaged && !isOwnedApp && 'Custom Provider App'}
+                      {isUnverified && 'Requirements Unverified'}
+                      {!isComposioManaged && !isOwnedApp && !isUnverified && 'Custom Provider App'}
                     </span>
                   </div>
 

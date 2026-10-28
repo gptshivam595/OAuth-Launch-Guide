@@ -6,15 +6,31 @@ export type EvidenceClass =
   | 'estimate'
   | 'unverified';
 
+export type EvidenceStatus =
+  | 'verified_official'
+  | 'observed_api'
+  | 'supported_evidence'
+  | 'estimated'
+  | 'inferred_confirmation_required'
+  | 'unknown_not_documented'
+  | 'unverified'
+  | 'blocked_policy';
+
+export type ValidationStatus =
+  | 'verified'
+  | 'unverified'
+  | 'requires_human_review';
+
 export interface Source {
   id: string;
   title: string;
   canonicalUrl: string;
-  sourceType: 'composio_docs' | 'provider_docs' | 'api_metadata' | 'community_report' | 'official_policy';
-  retrievalMethod: 'direct_fetch' | 'gemini_search_grounding' | 'verified_doc_archive' | 'metadata_api';
-  retrievalStatus: 'retrieved' | 'cached' | 'partial' | 'failed';
+  sourceType: 'composio_docs' | 'provider_docs' | 'api_metadata' | 'community_report' | 'official_policy' | 'secondary_source';
+  retrievalMethod: 'direct_fetch' | 'gemini_search_grounding' | 'verified_doc_archive' | 'metadata_api' | 'manual_curation';
+  retrievalStatus: 'retrieved' | 'cached' | 'partial' | 'failed' | 'not_attempted';
   retrievedAt: string | null;
   summary?: string;
+  supportingExcerpt?: string;
 }
 
 export interface Claim {
@@ -23,6 +39,10 @@ export interface Claim {
   applicability: string;
   sourceIds: string[];
   evidenceClass: EvidenceClass;
+  evidenceStatus?: EvidenceStatus;
+  supportingExcerpt?: string;
+  validationStatus?: ValidationStatus;
+  validationNote?: string;
   uncertaintyNote?: string;
 }
 
@@ -40,9 +60,11 @@ export interface PermissionItem {
   permission: string;
   whyNeeded: string;
   providerProductRequirement?: string;
-  reviewImplication: 'Non-sensitive / instant' | 'Sensitive scope / verification required' | 'Restricted scope / security audit (CASA)' | 'Partner approval / product application required' | 'Standard user consent';
+  reviewImplication: 'Non-sensitive / instant' | 'Sensitive scope / verification required' | 'Restricted scope / security audit (CASA)' | 'Partner approval / product application required' | 'Standard user consent' | 'Unknown / unverified';
+  evidenceStatus?: EvidenceStatus;
   sourceIds: string[];
   uncertainty?: string;
+  isConfirmedScope?: boolean;
 }
 
 export interface ChecklistStep {
@@ -73,6 +95,7 @@ export interface Blocker {
 export type StartingPath =
   | 'composio_managed_suitable'
   | 'register_owned_app'
+  | 'unverified_provider_requirements'
   | 'more_information_needed'
   | 'oauth_not_established'
   | 'provider_not_found_in_composio';
@@ -101,12 +124,21 @@ export interface PathAssessment {
   limitations: string[];
 }
 
+export type ComposioLookupOutcome =
+  | 'confirmed_available'
+  | 'confirmed_unavailable'
+  | 'ambiguous_config'
+  | 'toolkit_not_found'
+  | 'network_error'
+  | 'malformed_metadata';
+
 export interface ComposioToolkitMatch {
   found: boolean;
   slug?: string;
   name?: string;
   docUrl?: string;
   managedAuthAvailable: 'available' | 'unavailable' | 'unknown';
+  lookupOutcome?: ComposioLookupOutcome;
   relevantAuthMethod: string;
   metadataStatus: 'api_checked' | 'documentation_checked' | 'unverified';
   limitationsDocumented: string[];
@@ -134,6 +166,17 @@ export interface EvidenceAndUnknowns {
   unresolvedAssumptions: string[];
 }
 
+export interface EvidenceValidationSummary {
+  totalClaims: number;
+  verifiedClaims: number;
+  unverifiedClaims: number;
+  claimsRequiringReview: number;
+  orphanSourcesCount: number;
+  missingSourceReferencesCount: number;
+  overallReliability: 'high_confidence' | 'partially_verified' | 'unverified_desk_research';
+  validationTimestamp: string;
+}
+
 export interface Guide {
   id: string;
   slug: string;
@@ -157,6 +200,9 @@ export interface Guide {
   evidenceAndUnknowns: EvidenceAndUnknowns;
   sources: Source[];
   claims: Claim[];
+  evidenceValidation?: EvidenceValidationSummary;
+  isPartialResearch?: boolean;
+  unverifiedNotice?: string;
   updatedAt: string;
   createdAt: string;
 }

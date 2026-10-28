@@ -13,6 +13,7 @@
         "name": "Airtable Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/airtable",
         "managedAuthAvailable": "available",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0 (Authorization Code with PKCE)",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -291,7 +292,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Details actions, authentication methods, and setup guides for Airtable in Composio."
+          "summary": "Details actions, authentication methods, and setup guides for Airtable in Composio.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-composio-managed-auth",
@@ -301,7 +303,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Explains when managed OAuth is available and when custom apps are advised."
+          "summary": "Explains when managed OAuth is available and when custom apps are advised.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-composio-custom-auth",
@@ -311,7 +314,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Guides configuring custom client credentials and redirect URIs in Composio."
+          "summary": "Guides configuring custom client credentials and redirect URIs in Composio.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-airtable-official-scopes",
@@ -321,7 +325,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Official listing of Airtable OAuth scopes, granularities, and resource permissions."
+          "summary": "Official listing of Airtable OAuth scopes, granularities, and resource permissions.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-airtable-dev-hub",
@@ -331,7 +336,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Developer portal for creating OAuth clients, managing redirect URIs, and generating credentials."
+          "summary": "Developer portal for creating OAuth clients, managing redirect URIs, and generating credentials.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -381,6 +387,7 @@
         "name": "LinkedIn Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/linkedin",
         "managedAuthAvailable": "available",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0 (3-legged OAuth)",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -682,7 +689,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Details supported LinkedIn actions and configuration requirements in Composio."
+          "summary": "Details supported LinkedIn actions and configuration requirements in Composio.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-composio-linkedin-custom",
@@ -692,7 +700,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Explicit Composio advisory recommending owned OAuth apps for production to avoid shared rate limits."
+          "summary": "Explicit Composio advisory recommending owned OAuth apps for production to avoid shared rate limits.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-linkedin-dev-docs",
@@ -702,7 +711,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Official Microsoft Learn documentation for LinkedIn OAuth 2.0, scopes, and app verification."
+          "summary": "Official Microsoft Learn documentation for LinkedIn OAuth 2.0, scopes, and app verification.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -741,6 +751,7 @@
         "name": "Gmail Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/gmail",
         "managedAuthAvailable": "available",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0 (Google OAuth Authorization Code)",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -1096,7 +1107,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Details Gmail actions, parameters, and Composio integration setup."
+          "summary": "Details Gmail actions, parameters, and Composio integration setup.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-google-gmail-scopes",
@@ -1106,7 +1118,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Official listing of Gmail OAuth scopes confirming gmail.readonly and gmail.compose are Restricted Scopes."
+          "summary": "Official listing of Gmail OAuth scopes confirming gmail.readonly and gmail.compose are Restricted Scopes.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-google-sensitive-scopes",
@@ -1116,7 +1129,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Requirements for demo videos, domain verification, and privacy policies."
+          "summary": "Requirements for demo videos, domain verification, and privacy policies.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-google-restricted-scopes",
@@ -1126,7 +1140,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-20T01:00:00Z",
-          "summary": "Requirements for CASA Tier 2 third-party security audits for apps using restricted scopes."
+          "summary": "Requirements for CASA Tier 2 third-party security audits for apps using restricted scopes.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -1166,6 +1181,7 @@
         "name": "Linear Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/linear",
         "managedAuthAvailable": "available",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -1446,7 +1462,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:10:17.503Z",
-          "summary": "Documented actions: linear_read, linear_write"
+          "summary": "Documented actions: linear_read, linear_write",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-provider-linear",
@@ -1456,7 +1473,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "partial",
           "retrievedAt": "2026-10-21T12:10:38.037Z",
-          "summary": "Official OAuth 2.0 documentation entry point for Linear."
+          "summary": "Official OAuth 2.0 documentation entry point for Linear.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -1716,7 +1734,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:13:35.032Z",
-          "summary": "Decentralized OAuth 2.0 implementation. OAuth endpoints are hosted independently per instance (e.g. https://<instance>/oauth/authorize)."
+          "summary": "Decentralized OAuth 2.0 implementation. OAuth endpoints are hosted independently per instance (e.g. https://<instance>/oauth/authorize).",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-mastodon-2",
@@ -1726,7 +1745,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:13:35.032Z",
-          "summary": "POST /api/v1/apps allows automatic, instant registration of an OAuth client on any target Mastodon instance without human review."
+          "summary": "POST /api/v1/apps allows automatic, instant registration of an OAuth client on any target Mastodon instance without human review.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -1766,6 +1786,7 @@
         "name": "Strava Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/strava",
         "managedAuthAvailable": "available",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -2059,7 +2080,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:11:47.153Z",
-          "summary": "Documented actions: strava_read, strava_write"
+          "summary": "Documented actions: strava_read, strava_write",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-strava-1",
@@ -2069,7 +2091,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:11:47.153Z",
-          "summary": "Official guide covering initial application setup, single-player athlete restrictions, 10-athlete testing tier, and rate limit increase requests."
+          "summary": "Official guide covering initial application setup, single-player athlete restrictions, 10-athlete testing tier, and rate limit increase requests.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-strava-2",
@@ -2079,7 +2102,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:11:47.153Z",
-          "summary": "Section 5.3 explicitly restricts operating AI applications with API data (including LLM grounding, context, prompt construction, RAG, and AI summaries). Section 3.5 MCP exception is strictly limited to personal single-user setups, not multi-customer commercial apps."
+          "summary": "Section 5.3 explicitly restricts operating AI applications with API data (including LLM grounding, context, prompt construction, RAG, and AI summaries). Section 3.5 MCP exception is strictly limited to personal single-user setups, not multi-customer commercial apps.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-strava-3",
@@ -2089,7 +2113,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:11:47.153Z",
-          "summary": "Developer terms requiring application owners to maintain an active paid Strava subscription and detailing commercial distribution constraints."
+          "summary": "Developer terms requiring application owners to maintain an active paid Strava subscription and detailing commercial distribution constraints.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-strava-4",
@@ -2099,7 +2124,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:11:47.153Z",
-          "summary": "OAuth 2.0 authorization code exchange and token refresh specification for Strava athletes."
+          "summary": "OAuth 2.0 authorization code exchange and token refresh specification for Strava athletes.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -2139,6 +2165,7 @@
         "name": "Spotify Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/spotify",
         "managedAuthAvailable": "unavailable",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0 (Custom App Required)",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -2409,7 +2436,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:08.601Z",
-          "summary": "Documented actions: spotify_read, spotify_write"
+          "summary": "Documented actions: spotify_read, spotify_write",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-spotify-1",
@@ -2419,7 +2447,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:08.601Z",
-          "summary": "Details Development Mode restrictions (max 5 whitelisted users, Premium owner required) versus Extended Quota Mode eligibility and review."
+          "summary": "Details Development Mode restrictions (max 5 whitelisted users, Premium owner required) versus Extended Quota Mode eligibility and review.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-spotify-2",
@@ -2429,7 +2458,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:08.601Z",
-          "summary": "Official app creation workflow, Client ID/Secret generation, and redirect URI management."
+          "summary": "Official app creation workflow, Client ID/Secret generation, and redirect URI management.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-spotify-3",
@@ -2439,7 +2469,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:08.601Z",
-          "summary": "Official Composio documentation explicitly confirming: \"Composio-managed OAuth not available. Create your own OAuth app in the Spotify Developer Dashboard.\""
+          "summary": "Official Composio documentation explicitly confirming: \"Composio-managed OAuth not available. Create your own OAuth app in the Spotify Developer Dashboard.\"",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -2479,6 +2510,7 @@
         "name": "Xero Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/xero",
         "managedAuthAvailable": "unavailable",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0 (Custom App Required)",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -2759,7 +2791,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:33.369Z",
-          "summary": "Documented actions: xero_read, xero_write"
+          "summary": "Documented actions: xero_read, xero_write",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-xero-1",
@@ -2769,7 +2802,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:33.369Z",
-          "summary": "Official guide on OAuth 2.0 authorization code flow with PKCE, connection limits, and multi-tenant organisation selection."
+          "summary": "Official guide on OAuth 2.0 authorization code flow with PKCE, connection limits, and multi-tenant organisation selection.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-xero-2",
@@ -2779,7 +2813,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:33.369Z",
-          "summary": "Explains the 5 active organisation limit for uncertified apps and requirements to become a certified Xero App Store partner for external customers."
+          "summary": "Explains the 5 active organisation limit for uncertified apps and requirements to become a certified Xero App Store partner for external customers.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-xero-3",
@@ -2789,7 +2824,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:12:33.369Z",
-          "summary": "Official Composio documentation explicitly confirming: \"Composio-managed OAuth not available. Create your own OAuth app in the Xero Developer Portal.\""
+          "summary": "Official Composio documentation explicitly confirming: \"Composio-managed OAuth not available. Create your own OAuth app in the Xero Developer Portal.\"",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -2829,6 +2865,7 @@
         "name": "Docusign Toolkit",
         "docUrl": "https://docs.composio.dev/toolkits/docusign",
         "managedAuthAvailable": "unavailable",
+        "lookupOutcome": "ambiguous_config",
         "relevantAuthMethod": "OAuth 2.0 (Custom App Required)",
         "metadataStatus": "documentation_checked",
         "limitationsDocumented": [
@@ -3079,7 +3116,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:13:07.774Z",
-          "summary": "Documented actions: docusign_read, docusign_write"
+          "summary": "Documented actions: docusign_read, docusign_write",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-docusign-1",
@@ -3089,7 +3127,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:13:07.774Z",
-          "summary": "Official guide covering modern go-live verification. Note: Modern go-live does NOT require a universal 20-call rule; eligible developer accounts receive automatic review or submitted review."
+          "summary": "Official guide covering modern go-live verification. Note: Modern go-live does NOT require a universal 20-call rule; eligible developer accounts receive automatic review or submitted review.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-docusign-2",
@@ -3099,7 +3138,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:13:07.774Z",
-          "summary": "Requirements for public multi-tenant SaaS applications and ISVs distributing to external DocuSign customers."
+          "summary": "Requirements for public multi-tenant SaaS applications and ISVs distributing to external DocuSign customers.",
+          "supportingExcerpt": ""
         },
         {
           "id": "src-grounding-docusign-3",
@@ -3109,7 +3149,8 @@
           "retrievalMethod": "direct_fetch",
           "retrievalStatus": "retrieved",
           "retrievedAt": "2026-10-21T12:13:07.774Z",
-          "summary": "Authorization Code Grant and JWT Grant flows for DocuSign eSignature REST API."
+          "summary": "Authorization Code Grant and JWT Grant flows for DocuSign eSignature REST API.",
+          "supportingExcerpt": ""
         }
       ],
       "claims": [
@@ -3135,6 +3176,279 @@
       ],
       "updatedAt": "2026-10-21T12:13:34.497Z",
       "createdAt": "2026-10-21T12:13:34.497Z"
+    },
+    "hypotheticalunfamiliarcloudcorp999-guide-v1": {
+      "id": "hypotheticalunfamiliarcloudcorp999-guide-v1",
+      "slug": "hypotheticalunfamiliarcloudcorp999",
+      "version": 1,
+      "providerName": "HypotheticalUnfamiliarCloudCorp999",
+      "providerWebsite": "",
+      "exampleUseCase": "Synchronize warehouse inventory units",
+      "composioToolkitMatch": null,
+      "useCaseFit": "unknown",
+      "pathAssessment": {
+        "startingPath": "unverified_provider_requirements",
+        "headline": "Provider-Specific OAuth Requirements Not Yet Verified",
+        "why": "We could not safely determine the required scopes, app registration rules, or approval process for \"HypotheticalUnfamiliarCloudCorp999\" from available evidence. Review provider developer documentation before implementation.",
+        "assumptions": {
+          "intendedActions": "Synchronize warehouse inventory units",
+          "audience": "external_customers",
+          "customBrandingRequired": false,
+          "alreadyHasApp": false,
+          "specialNotes": ""
+        },
+        "canStartTesting": {
+          "status": "with_limitations",
+          "note": "Unverified: Determine whether HypotheticalUnfamiliarCloudCorp999 offers a developer sandbox or requires formal business verification before testing."
+        },
+        "whatCouldBlockLaunch": "Unverified provider approval queues, partner restrictions, or lack of public OAuth APIs.",
+        "developerEffort": "1–3 hours for portal investigation, credential setup, and test connection.",
+        "externalWaiting": "Not publicly specified - official review queues vary; inspect provider portal for published SLAs.",
+        "myNextAction": "Locate HypotheticalUnfamiliarCloudCorp999 official developer portal, review OAuth documentation, and verify required scope strings.",
+        "limitations": [
+          "Provider OAuth requirements have not been confirmed against primary official documentation.",
+          "Consent screen branding and approval requirements depend on provider app registration policies.",
+          "Verify required scopes and quotas in provider developer console before launching to customers."
+        ]
+      },
+      "prerequisites": [
+        {
+          "category": "HypotheticalUnfamiliarCloudCorp999 Accounts & Access",
+          "items": [
+            "Active HypotheticalUnfamiliarCloudCorp999 account with administrative privileges.",
+            "Access to HypotheticalUnfamiliarCloudCorp999 Developer Portal."
+          ]
+        },
+        {
+          "category": "Composio Setup",
+          "items": [
+            "Composio API Key and active workspace.",
+            "Redirect URI supplied by your Composio auth configuration."
+          ]
+        },
+        {
+          "category": "Branding & Policy URLs",
+          "items": [
+            "Application Name and Logo.",
+            "Privacy Policy and Terms of Service URLs (required for external verification)."
+          ]
+        }
+      ],
+      "permissionsTable": [
+        {
+          "feature": "Intended integration: Synchronize warehouse inventory units",
+          "permission": "Pending developer portal confirmation",
+          "whyNeeded": "Feature requires provider authorization, but exact scope strings have not been verified from official documentation.",
+          "providerProductRequirement": "Verify required API products in HypotheticalUnfamiliarCloudCorp999 Developer Portal",
+          "reviewImplication": "Unknown / unverified",
+          "evidenceStatus": "unknown_not_documented",
+          "isConfirmedScope": false,
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "uncertainty": "Provider-specific OAuth scope strings for \"HypotheticalUnfamiliarCloudCorp999\" could not be safely confirmed from available documentation. Inspect the provider's official scope directory before implementation."
+        }
+      ],
+      "setupChecklist": [
+        {
+          "id": "hypotheticalunfamiliarcloudcorp999-step-1",
+          "action": "Identify Official Developer Portal & Review Launch Constraints",
+          "owner": "developer",
+          "prerequisites": [
+            "Product feature spec"
+          ],
+          "completionCondition": "Decided on authentication approach and confirmed portal URL.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceStatus": "unverified",
+          "estimate": {
+            "duration": "15 min",
+            "basis": "Portal documentation review"
+          },
+          "phase": "composio_prep",
+          "details": "Locate HypotheticalUnfamiliarCloudCorp999's official developer portal and review OAuth documentation before writing code."
+        },
+        {
+          "id": "hypotheticalunfamiliarcloudcorp999-step-2",
+          "action": "Register OAuth Application in HypotheticalUnfamiliarCloudCorp999 Developer Console",
+          "owner": "developer",
+          "prerequisites": [
+            "HypotheticalUnfamiliarCloudCorp999 developer access"
+          ],
+          "completionCondition": "Client credentials generated or dynamic registration implemented.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceStatus": "unverified",
+          "estimate": {
+            "duration": "20 min",
+            "basis": "Portal form submission or API call"
+          },
+          "phase": "provider_registration",
+          "details": "Access the HypotheticalUnfamiliarCloudCorp999 developer portal (official developer console) and register your application."
+        },
+        {
+          "id": "hypotheticalunfamiliarcloudcorp999-step-3",
+          "action": "Configure Authorized Redirect URI",
+          "owner": "developer",
+          "prerequisites": [
+            "App created in portal"
+          ],
+          "completionCondition": "Redirect URI saved in provider OAuth settings.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceStatus": "source_backed",
+          "estimate": {
+            "duration": "5 min",
+            "basis": "OAuth configuration"
+          },
+          "phase": "access_configuration",
+          "details": "Copy the Redirect URI from your Composio auth configuration and add it to Authorized Redirect URIs in your provider console."
+        },
+        {
+          "id": "hypotheticalunfamiliarcloudcorp999-step-4",
+          "action": "Save Client ID and Secret in Composio Dashboard",
+          "owner": "developer",
+          "prerequisites": [
+            "Client credentials obtained"
+          ],
+          "completionCondition": "Custom integration configured under Composio Integrations.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceStatus": "source_backed",
+          "estimate": {
+            "duration": "5 min",
+            "basis": "Dashboard field entry"
+          },
+          "phase": "composio_prep",
+          "details": "Enter your Client ID and Client Secret in Composio custom app settings, and note your Auth Config ID."
+        },
+        {
+          "id": "hypotheticalunfamiliarcloudcorp999-step-5",
+          "action": "Execute Test Connection with Sandbox / Development Account",
+          "owner": "developer",
+          "prerequisites": [
+            "Auth configured in Composio"
+          ],
+          "completionCondition": "Successful OAuth authorization and active connected account ID.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceStatus": "source_backed",
+          "estimate": {
+            "duration": "10 min",
+            "basis": "Interactive consent flow"
+          },
+          "phase": "testing_and_launch",
+          "details": "Connect an account and verify that agent actions return expected data."
+        }
+      ],
+      "approvalAndDistribution": {
+        "appRegistration": "Locate the official HypotheticalUnfamiliarCloudCorp999 Developer Portal to check registration requirements.",
+        "apiProductAccessApproval": "Approval requirements not yet verified. Review provider developer policies.",
+        "providerVerification": "Unknown / not verified from official documentation.",
+        "marketplaceDistribution": "Unknown / optional public directory listing.",
+        "customerAdminApproval": "Workspace or tenant administrators may need to approve the integration depending on enterprise policy.",
+        "endUserConsent": "End-user authorization dialog showing requested permissions and registered app details."
+      },
+      "blockersAndRecovery": [
+        {
+          "symptom": "OAuth redirect returns redirect_uri_mismatch or invalid_client error",
+          "checks": [
+            "Verify the exact redirect URI entered in the provider developer console.",
+            "Confirm that the Client ID and Secret were copied into Composio auth settings without trailing whitespace."
+          ],
+          "explanationOrHypothesis": "Provider OAuth servers enforce exact character matching on authorized redirect URIs.",
+          "isHypothesis": false,
+          "nextAction": "Copy the exact Redirect URI from your Composio auth configuration dashboard and update the provider portal.",
+          "humanHandoff": "Developer updates portal settings."
+        },
+        {
+          "symptom": "Authorization fails with \"Access not approved\" or \"Unverified App\" warning",
+          "checks": [
+            "Check whether provider requires organizational verification, domain verification, or manual partner review.",
+            "Verify if end-user is in the approved test user whitelist."
+          ],
+          "explanationOrHypothesis": "Many providers block authorization for unverified third-party applications.",
+          "isHypothesis": false,
+          "nextAction": "Review provider verification guidelines and submit required app details or add test user accounts.",
+          "humanHandoff": "Developer or compliance team submits provider verification form."
+        }
+      ],
+      "evidenceAndUnknowns": {
+        "composioDocs": [
+          "No Composio toolkit documented"
+        ],
+        "providerDocs": [],
+        "metadataApiObservations": [],
+        "communityReports": [],
+        "estimates": [
+          "1–3 hours for portal investigation, credential setup, and test connection."
+        ],
+        "setupAttempts": [],
+        "unresolvedAssumptions": [
+          "Official OAuth 2.0 scope strings required for intended actions.",
+          "Provider review SLA and public distribution requirements.",
+          "Whether provider supports self-service app creation or requires partner application."
+        ]
+      },
+      "sources": [
+        {
+          "id": "src-unverified-hypotheticalunfamiliarcloudcorp999",
+          "title": "Pending Official Documentation for HypotheticalUnfamiliarCloudCorp999",
+          "canonicalUrl": "https://www.google.com/search?q=HypotheticalUnfamiliarCloudCorp999%20developer%20portal%20oauth",
+          "sourceType": "secondary_source",
+          "retrievalMethod": "manual_curation",
+          "retrievalStatus": "not_attempted",
+          "retrievedAt": null,
+          "summary": "Primary official documentation has not yet been retrieved or verified for HypotheticalUnfamiliarCloudCorp999. Developer verification required.",
+          "supportingExcerpt": ""
+        }
+      ],
+      "claims": [
+        {
+          "id": "cl-hypotheticalunfamiliarcloudcorp999-1",
+          "statement": "No pre-built Composio toolkit was identified for HypotheticalUnfamiliarCloudCorp999; direct provider OAuth or custom integration required.",
+          "applicability": "Integration architecture decision.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceClass": "unverified",
+          "evidenceStatus": "supported_evidence",
+          "validationStatus": "verified",
+          "validationNote": "Corroborated by 1 reference source(s)."
+        },
+        {
+          "id": "cl-hypotheticalunfamiliarcloudcorp999-2",
+          "statement": "Provider-specific OAuth requirements have not yet been verified from primary official documentation for HypotheticalUnfamiliarCloudCorp999.",
+          "applicability": "Production deployment planning.",
+          "sourceIds": [
+            "src-unverified-hypotheticalunfamiliarcloudcorp999"
+          ],
+          "evidenceClass": "unverified",
+          "uncertaintyNote": "Unresolved requirements must be confirmed in provider developer console.",
+          "evidenceStatus": "supported_evidence",
+          "validationStatus": "verified",
+          "validationNote": "Corroborated by 1 reference source(s)."
+        }
+      ],
+      "evidenceValidation": {
+        "totalClaims": 2,
+        "verifiedClaims": 2,
+        "unverifiedClaims": 0,
+        "claimsRequiringReview": 0,
+        "orphanSourcesCount": 0,
+        "missingSourceReferencesCount": 0,
+        "overallReliability": "high_confidence",
+        "validationTimestamp": "2026-10-28T14:45:00.840Z"
+      },
+      "isPartialResearch": true,
+      "unverifiedNotice": "Provider-specific OAuth requirements have not yet been verified from primary official documentation. We could not safely determine the required scopes or approval process from the available evidence.",
+      "updatedAt": "2026-10-28T14:45:00.840Z",
+      "createdAt": "2026-10-28T14:45:00.840Z"
     }
   },
   "researchJobs": {
@@ -4368,6 +4682,238 @@
       "createdAt": "2026-10-21T12:13:34.504Z",
       "updatedAt": "2026-10-21T12:13:56.427Z",
       "guideId": "mastodon-guide-v1"
+    },
+    "job-test-unknown-1793198458026": {
+      "id": "job-test-unknown-1793198458026",
+      "providerInput": "HypotheticalUnfamiliarCloudCorp999",
+      "assumptions": {
+        "intendedActions": "Synchronize warehouse inventory units",
+        "audience": "external_customers",
+        "customBrandingRequired": false,
+        "alreadyHasApp": false
+      },
+      "status": "completed",
+      "currentStage": "completed",
+      "events": [
+        {
+          "stage": "resolve_identity",
+          "title": "Resolving Provider Identity",
+          "description": "Investigating provider input: \"HypotheticalUnfamiliarCloudCorp999\". Determining canonical identity and developer portal.",
+          "timestamp": "2026-10-28T14:40:58.027Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "Checking Composio Toolkit & Managed Auth Support",
+          "description": "Searching Composio documentation for matching toolkit and checking managed authentication schemes.",
+          "timestamp": "2026-10-28T14:40:58.028Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "No Matching Composio Toolkit Identified",
+          "description": "Provider \"HypotheticalUnfamiliarCloudCorp999\" was not identified in the Composio toolkit catalogue (Documentation checked: GET https://docs.composio.dev/toolkits/hypotheticalunfamiliarcloudcorp999 returned 404 Not Found at 2026-10-28T14:40:58.528Z). Direct provider OAuth required.",
+          "timestamp": "2026-10-28T14:40:58.528Z"
+        },
+        {
+          "stage": "read_provider_requirements",
+          "title": "Investigating Provider Developer Portal & OAuth Specifications",
+          "description": "Retrieving official developer documentation for HypotheticalUnfamiliarCloudCorp999 OAuth registration, scopes, and review policies.",
+          "timestamp": "2026-10-28T14:40:58.528Z"
+        },
+        {
+          "stage": "assess_oauth_path",
+          "title": "Evaluating Composio-Managed vs Owned App Path",
+          "description": "Evaluating evidence against developer brief: custom branding=false, audience=external_customers.",
+          "timestamp": "2026-10-28T14:41:07.023Z"
+        },
+        {
+          "stage": "build_guide",
+          "title": "Synthesizing Structured Setup & Approval Guide",
+          "description": "Compiling prerequisites, granular permission mappings, step-by-step checklist, blockers, and recovery paths.",
+          "timestamp": "2026-10-28T14:41:07.023Z"
+        },
+        {
+          "stage": "check_evidence",
+          "title": "Verifying Evidence Contract & Claim Citations",
+          "description": "Validating claims, referential integrity, and source citations.",
+          "timestamp": "2026-10-28T14:41:07.024Z"
+        },
+        {
+          "stage": "completed",
+          "title": "Research Complete & Shareable Guide Published",
+          "description": "Guide synthesized with 0 source(s), 0 verified claim(s), and 2 claim(s) flagged for human review.",
+          "timestamp": "2026-10-28T14:41:07.025Z"
+        }
+      ],
+      "sourcesDiscovered": [],
+      "createdAt": "2026-10-28T14:40:58.026Z",
+      "updatedAt": "2026-10-28T14:41:07.025Z",
+      "guideId": "hypotheticalunfamiliarcloudcorp999-guide-v1"
+    },
+    "job-test-unknown-1793198484912": {
+      "id": "job-test-unknown-1793198484912",
+      "providerInput": "HypotheticalUnfamiliarCloudCorp999",
+      "assumptions": {
+        "intendedActions": "Synchronize warehouse inventory units",
+        "audience": "external_customers",
+        "customBrandingRequired": false,
+        "alreadyHasApp": false
+      },
+      "status": "failed",
+      "currentStage": "failed",
+      "events": [
+        {
+          "stage": "resolve_identity",
+          "title": "Resolving Provider Identity",
+          "description": "Investigating provider input: \"HypotheticalUnfamiliarCloudCorp999\". Determining canonical identity and developer portal.",
+          "timestamp": "2026-10-28T14:41:24.914Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "Checking Composio Toolkit & Managed Auth Support",
+          "description": "Searching Composio documentation for matching toolkit and checking managed authentication schemes.",
+          "timestamp": "2026-10-28T14:41:24.914Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "No Matching Composio Toolkit Identified",
+          "description": "Provider \"HypotheticalUnfamiliarCloudCorp999\" was not identified in the Composio toolkit catalogue (Documentation checked: GET https://docs.composio.dev/toolkits/hypotheticalunfamiliarcloudcorp999 returned 404 Not Found at 2026-10-28T14:41:25.494Z). Direct provider OAuth required.",
+          "timestamp": "2026-10-28T14:41:25.494Z"
+        },
+        {
+          "stage": "read_provider_requirements",
+          "title": "Investigating Provider Developer Portal & OAuth Specifications",
+          "description": "Retrieving official developer documentation for HypotheticalUnfamiliarCloudCorp999 OAuth registration, scopes, and review policies.",
+          "timestamp": "2026-10-28T14:41:25.494Z"
+        },
+        {
+          "stage": "failed",
+          "title": "Investigation Halted with Error Details",
+          "description": "Error encountered: Cannot access 'slug' before initialization. Partial evidence gathered prior to failure is preserved.",
+          "timestamp": "2026-10-28T14:41:56.169Z"
+        }
+      ],
+      "sourcesDiscovered": [],
+      "createdAt": "2026-10-28T14:41:24.912Z",
+      "updatedAt": "2026-10-28T14:41:56.169Z",
+      "error": "Cannot access 'slug' before initialization"
+    },
+    "job-test-unknown-1793198570647": {
+      "id": "job-test-unknown-1793198570647",
+      "providerInput": "HypotheticalUnfamiliarCloudCorp999",
+      "assumptions": {
+        "intendedActions": "Synchronize warehouse inventory units",
+        "audience": "external_customers",
+        "customBrandingRequired": false,
+        "alreadyHasApp": false
+      },
+      "status": "researching",
+      "currentStage": "read_provider_requirements",
+      "events": [
+        {
+          "stage": "resolve_identity",
+          "title": "Resolving Provider Identity",
+          "description": "Investigating provider input: \"HypotheticalUnfamiliarCloudCorp999\". Determining canonical identity and developer portal.",
+          "timestamp": "2026-10-28T14:42:50.648Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "Checking Composio Toolkit & Managed Auth Support",
+          "description": "Searching Composio documentation for matching toolkit and checking managed authentication schemes.",
+          "timestamp": "2026-10-28T14:42:50.648Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "No Matching Composio Toolkit Identified",
+          "description": "Provider \"HypotheticalUnfamiliarCloudCorp999\" was not identified in the Composio toolkit catalogue (Documentation checked: GET https://docs.composio.dev/toolkits/hypotheticalunfamiliarcloudcorp999 returned 404 Not Found at 2026-10-28T14:42:51.208Z). Direct provider OAuth required.",
+          "timestamp": "2026-10-28T14:42:51.208Z"
+        },
+        {
+          "stage": "read_provider_requirements",
+          "title": "Investigating Provider Developer Portal & OAuth Specifications",
+          "description": "Retrieving official developer documentation for HypotheticalUnfamiliarCloudCorp999 OAuth registration, scopes, and review policies.",
+          "timestamp": "2026-10-28T14:42:51.208Z"
+        }
+      ],
+      "sourcesDiscovered": [],
+      "createdAt": "2026-10-28T14:42:50.647Z",
+      "updatedAt": "2026-10-28T14:42:51.208Z"
+    },
+    "job-test-unknown-1793198687319": {
+      "id": "job-test-unknown-1793198687319",
+      "providerInput": "HypotheticalUnfamiliarCloudCorp999",
+      "assumptions": {
+        "intendedActions": "Synchronize warehouse inventory units",
+        "audience": "external_customers",
+        "customBrandingRequired": false,
+        "alreadyHasApp": false
+      },
+      "status": "completed",
+      "currentStage": "completed",
+      "events": [
+        {
+          "stage": "resolve_identity",
+          "title": "Resolving Provider Identity",
+          "description": "Investigating provider input: \"HypotheticalUnfamiliarCloudCorp999\". Determining canonical identity and developer portal.",
+          "timestamp": "2026-10-28T14:44:47.321Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "Checking Composio Toolkit & Managed Auth Support",
+          "description": "Searching Composio documentation for matching toolkit and checking managed authentication schemes.",
+          "timestamp": "2026-10-28T14:44:47.321Z"
+        },
+        {
+          "stage": "check_composio",
+          "title": "No Matching Composio Toolkit Identified",
+          "description": "Provider \"HypotheticalUnfamiliarCloudCorp999\" was not identified in the Composio toolkit catalogue (Documentation checked: GET https://docs.composio.dev/toolkits/hypotheticalunfamiliarcloudcorp999 returned 404 Not Found at 2026-10-28T14:44:49.854Z). Direct provider OAuth required.",
+          "timestamp": "2026-10-28T14:44:49.854Z"
+        },
+        {
+          "stage": "read_provider_requirements",
+          "title": "Investigating Provider Developer Portal & OAuth Specifications",
+          "description": "Retrieving official developer documentation for HypotheticalUnfamiliarCloudCorp999 OAuth registration, scopes, and review policies.",
+          "timestamp": "2026-10-28T14:44:49.854Z"
+        },
+        {
+          "stage": "assess_oauth_path",
+          "title": "Evaluating Composio-Managed vs Owned App Path",
+          "description": "Evaluating evidence against developer brief: custom branding=false, audience=external_customers.",
+          "timestamp": "2026-10-28T14:45:00.839Z"
+        },
+        {
+          "stage": "build_guide",
+          "title": "Synthesizing Structured Setup & Approval Guide",
+          "description": "Compiling prerequisites, granular permission mappings, step-by-step checklist, blockers, and recovery paths.",
+          "timestamp": "2026-10-28T14:45:00.839Z"
+        },
+        {
+          "stage": "check_evidence",
+          "title": "Verifying Evidence Contract & Claim Citations",
+          "description": "Validating claims, referential integrity, and source citations.",
+          "timestamp": "2026-10-28T14:45:00.839Z"
+        },
+        {
+          "stage": "completed",
+          "title": "Research Complete & Shareable Guide Published",
+          "description": "Guide synthesized with 1 source(s), 2 verified claim(s), and 0 claim(s) flagged for human review.",
+          "timestamp": "2026-10-28T14:45:00.840Z"
+        }
+      ],
+      "sourcesDiscovered": [
+        {
+          "id": "src-unverified-hypotheticalunfamiliarcloudcorp999",
+          "title": "Pending Official Documentation for HypotheticalUnfamiliarCloudCorp999",
+          "canonicalUrl": "https://www.google.com/search?q=HypotheticalUnfamiliarCloudCorp999%20developer%20portal%20oauth",
+          "sourceType": "secondary_source",
+          "retrievalMethod": "manual_curation",
+          "retrievalStatus": "not_attempted",
+          "retrievedAt": null,
+          "summary": "Primary official documentation has not yet been retrieved or verified for HypotheticalUnfamiliarCloudCorp999. Developer verification required."
+        }
+      ],
+      "createdAt": "2026-10-28T14:44:47.319Z",
+      "updatedAt": "2026-10-28T14:45:00.840Z",
+      "guideId": "hypotheticalunfamiliarcloudcorp999-guide-v1"
     }
   },
   "nextStepPacks": {
@@ -4620,6 +5166,34 @@
       "warningsAndDisclaimers": [
         "Local checklist marks your personal progress on this device and does not certify provider approval.",
         "Review provider rate limits before launching to external customers."
+      ]
+    },
+    "hypotheticalunfamiliarcloudcorp999-guide-v1": {
+      "id": "pack-hypotheticalunfamiliarcloudcorp999-v1",
+      "guideId": "hypotheticalunfamiliarcloudcorp999-guide-v1",
+      "generatedAt": "2026-10-28T14:45:00.840Z",
+      "pathType": "owned",
+      "title": "HypotheticalUnfamiliarCloudCorp999 Next-Step Pack: Execution Checklist & Materials",
+      "summary": "Tailored action checklist, permission justifications, and connection verification plan for HypotheticalUnfamiliarCloudCorp999.",
+      "sections": [
+        {
+          "title": "1. Registration & Configuration Checklist",
+          "content": "### Setup Execution\n1. Open the **HypotheticalUnfamiliarCloudCorp999 Developer Portal** (developer console).\n2. Register a new OAuth 2.0 application for your AI agent.\n3. Set Authorized Redirect URI: copy the exact redirect URI from your Composio auth configuration dashboard.\n4. Select requested scopes: `Pending developer portal confirmation`.\n5. Enter Client ID and Secret in your Composio Dashboard and select this auth config in your app."
+        },
+        {
+          "title": "2. Permission Justifications for Review / Customers",
+          "content": "### Feature-to-Scope Mapping\n- **`Pending developer portal confirmation`**: Feature requires provider authorization, but exact scope strings have not been verified from official documentation."
+        },
+        {
+          "title": "3. Connection Validation Plan",
+          "content": "### Validation Steps\n- Connect a sandbox or developer test account.\n- Trigger agent action: \"Synchronize warehouse inventory units\".\n- Confirm token issuance and verify audit log in Composio."
+        }
+      ],
+      "draftPermissionJustification": "Our AI assistant requires access to HypotheticalUnfamiliarCloudCorp999 exclusively to perform \"Synchronize warehouse inventory units\" initiated and authorized by the customer.",
+      "demoWalkthroughOutline": "1. Show agent dashboard. 2. Click \"Connect HypotheticalUnfamiliarCloudCorp999\". 3. Complete OAuth prompt. 4. Execute test action \"Synchronize warehouse inventory units\".",
+      "warningsAndDisclaimers": [
+        "Local checklist marks your personal progress on this device and does not certify provider approval.",
+        "Requirements remain unverified from primary documentation. Confirm scope names and review policies in provider portal."
       ]
     }
   }

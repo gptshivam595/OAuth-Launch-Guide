@@ -273,11 +273,20 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
               <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-mono font-semibold uppercase ${
                 pAssessment.startingPath === 'composio_managed_suitable'
                   ? 'bg-[#00F29D]/15 text-[#00F29D] border border-[#00F29D]/30'
+                  : pAssessment.startingPath === 'unverified_provider_requirements'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                   : 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30'
               }`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${pAssessment.startingPath === 'composio_managed_suitable' ? 'bg-[#00F29D] shadow-[0_0_6px_#00F29D]' : 'bg-[#00E5FF] shadow-[0_0_6px_#00E5FF]'}`} />
+                <span className={`h-1.5 w-1.5 rounded-full ${
+                  pAssessment.startingPath === 'composio_managed_suitable' 
+                    ? 'bg-[#00F29D] shadow-[0_0_6px_#00F29D]' 
+                    : pAssessment.startingPath === 'unverified_provider_requirements'
+                    ? 'bg-amber-400 shadow-[0_0_6px_#f59e0b]'
+                    : 'bg-[#00E5FF] shadow-[0_0_6px_#00E5FF]'
+                }`} />
                 {pAssessment.startingPath === 'composio_managed_suitable' && 'Composio-Managed Suitable'}
                 {pAssessment.startingPath === 'register_owned_app' && 'Owned Provider App Advised'}
+                {pAssessment.startingPath === 'unverified_provider_requirements' && 'Requirements Unverified'}
                 {pAssessment.startingPath === 'provider_not_found_in_composio' && 'Custom Provider App'}
               </span>
             </div>
@@ -285,6 +294,28 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
               Intended Use: <span className="text-[#D1E7DD] font-medium">"{guide.exampleUseCase || guide.pathAssessment?.assumptions?.intendedActions || 'Integration actions'}"</span>
             </p>
           </div>
+
+          {guide.unverifiedNotice && (
+            <div className="w-full mt-4 p-4 rounded-xl border border-amber-500/40 bg-amber-950/25 text-xs space-y-2.5">
+              <div className="flex items-center gap-2 text-amber-300 font-display font-bold text-sm">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+                <span>Provider-Specific Requirements Not Verified</span>
+              </div>
+              <p className="text-[#D1E7DD] leading-relaxed">
+                {guide.unverifiedNotice}
+              </p>
+              <div className="p-3 rounded-lg bg-[#060B09]/80 border border-amber-500/20 space-y-1.5">
+                <div className="font-semibold text-white">Recommended Next Steps for Developer:</div>
+                <ul className="list-disc pl-4 space-y-1 text-[#7C988B] font-mono text-[11px]">
+                  <li>Identify the official developer portal for {guide.providerName}.</li>
+                  <li>Find the provider's official OAuth 2.0 authentication and authorization documentation.</li>
+                  <li>Locate the official scope directory matching your intended actions.</li>
+                  <li>Check whether application registration is self-service or requires manual partner approval.</li>
+                  <li>Review public distribution verification, domain checks, and privacy policy requirements.</li>
+                </ul>
+              </div>
+            </div>
+          )}
 
           <button
             onClick={() => setShowAssumptionEditor(!showAssumptionEditor)}
@@ -675,11 +706,27 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
             <tbody className="divide-y divide-[#1B382B] text-[#D1E7DD]">
               {guide.permissionsTable.map((p, i) => (
                 <tr key={i} className="hover:bg-[#171D1A]/50 transition">
-                  <td className="py-3 px-3.5 font-medium text-white">{p.feature}</td>
+                  <td className="py-3 px-3.5 font-medium text-white">
+                    <div>{p.feature}</div>
+                    {p.uncertainty && (
+                      <div className="text-[10px] text-amber-400 font-mono mt-0.5">{p.uncertainty}</div>
+                    )}
+                  </td>
                   <td className="py-3 px-3.5">
-                    <code className="font-mono text-[11px] bg-[#060B09] border border-[#1B382B] px-2 py-0.5 rounded text-[#00F29D]">
-                      {p.permission}
-                    </code>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <code className={`font-mono text-[11px] px-2 py-0.5 rounded border ${
+                        p.isConfirmedScope === false || p.permission.includes('Pending')
+                          ? 'bg-amber-950/40 border-amber-500/40 text-amber-300'
+                          : 'bg-[#060B09] border-[#1B382B] text-[#00F29D]'
+                      }`}>
+                        {p.permission}
+                      </code>
+                      {p.isConfirmedScope === false && (
+                        <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono font-semibold">
+                          Unconfirmed
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-3.5 leading-relaxed text-[#7C988B]">{p.whyNeeded}</td>
                   <td className="py-3 px-3.5">
@@ -688,6 +735,8 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
                         ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                         : p.reviewImplication.includes('Sensitive')
                         ? 'bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/30'
+                        : p.reviewImplication.includes('Unknown')
+                        ? 'bg-zinc-800 text-zinc-300 border border-zinc-700'
                         : 'bg-[#00F29D]/20 text-[#00F29D] border border-[#00F29D]/30'
                     }`}>
                       {p.reviewImplication}
@@ -851,12 +900,64 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
       {/* Tab 5: Evidence & Sources */}
       {activeTab === 'evidence' && (
         <div className="space-y-4">
+          {/* Validation Summary Card */}
+          {guide.evidenceValidation && (
+            <div className="cyber-panel rounded-xl p-5 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
+                <div>
+                  <h3 className="font-display font-bold text-white text-sm">Deterministic Evidence Contract Audit</h3>
+                  <p className="text-[11px] text-[#7C988B] font-mono">
+                    Referential integrity validation against stored sources
+                  </p>
+                </div>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-semibold ${
+                  guide.evidenceValidation.overallReliability === 'high_confidence'
+                    ? 'bg-[#00F29D]/15 text-[#00F29D] border border-[#00F29D]/30'
+                    : guide.evidenceValidation.overallReliability === 'partially_verified'
+                    ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/30'
+                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                }`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${
+                    guide.evidenceValidation.overallReliability === 'high_confidence'
+                      ? 'bg-[#00F29D]'
+                      : guide.evidenceValidation.overallReliability === 'partially_verified'
+                      ? 'bg-[#00E5FF]'
+                      : 'bg-amber-400'
+                  }`} />
+                  {guide.evidenceValidation.overallReliability === 'high_confidence' && 'High Confidence (All Claims Verified)'}
+                  {guide.evidenceValidation.overallReliability === 'partially_verified' && 'Partially Verified'}
+                  {guide.evidenceValidation.overallReliability === 'unverified_desk_research' && 'Unverified Desk Research'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="p-2.5 rounded-lg bg-[#0A0F0D] border border-[#1B382B]">
+                  <span className="text-[10px] text-[#7C988B] font-mono block">Total Claims</span>
+                  <span className="text-base font-display font-bold text-white">{guide.evidenceValidation.totalClaims}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-[#0A0F0D] border border-[#1B382B]">
+                  <span className="text-[10px] text-[#7C988B] font-mono block">Verified Claims</span>
+                  <span className="text-base font-display font-bold text-[#00F29D]">{guide.evidenceValidation.verifiedClaims}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-[#0A0F0D] border border-[#1B382B]">
+                  <span className="text-[10px] text-[#7C988B] font-mono block">Review Queue</span>
+                  <span className="text-base font-display font-bold text-amber-400">{guide.evidenceValidation.claimsRequiringReview}</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-[#0A0F0D] border border-[#1B382B]">
+                  <span className="text-[10px] text-[#7C988B] font-mono block">Discovered Sources</span>
+                  <span className="text-base font-display font-bold text-[#00E5FF]">{guide.sources.length}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sourced Citations */}
           <div className="cyber-panel rounded-xl p-5 text-xs">
-            <h3 className="font-display font-bold text-white mb-3">Verified Sourced Citations</h3>
+            <h3 className="font-display font-bold text-white mb-3">Primary Documentation & Reference Sources</h3>
             <div className="divide-y divide-[#1B382B]">
               {guide.sources.map((s) => (
-                <div key={s.id} className="py-3 flex items-start justify-between gap-3">
-                  <div>
+                <div key={s.id} className="py-3 flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                  <div className="space-y-1">
                     <a
                       href={s.canonicalUrl}
                       target="_blank"
@@ -866,9 +967,20 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
                       <span>{s.title}</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                    {s.summary && <p className="text-[#7C988B] text-[11px] mt-1">{s.summary}</p>}
+                    {s.summary && <p className="text-[#7C988B] text-[11px]">{s.summary}</p>}
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-[#7C988B]">
+                      <span>Method: <strong className="text-[#D1E7DD]">{s.retrievalMethod}</strong></span>
+                      <span>•</span>
+                      <span>Status: <strong className={s.retrievalStatus === 'retrieved' ? 'text-[#00F29D]' : 'text-amber-400'}>{s.retrievalStatus}</strong></span>
+                      {s.retrievedAt && (
+                        <>
+                          <span>•</span>
+                          <span>Timestamp: {new Date(s.retrievedAt).toLocaleDateString()}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <span className="font-mono text-[10px] text-[#7C988B] shrink-0 uppercase bg-[#0A0F0D] px-2 py-0.5 rounded border border-[#1B382B]">
+                  <span className="font-mono text-[10px] text-[#7C988B] shrink-0 uppercase bg-[#0A0F0D] px-2 py-0.5 rounded border border-[#1B382B] self-start">
                     {s.sourceType}
                   </span>
                 </div>
@@ -876,20 +988,58 @@ ${guide.blockersAndRecovery.map(b => `- **${b.symptom}**: ${b.explanationOrHypot
             </div>
           </div>
 
+          {/* Consequential Claims Audit */}
           {guide.claims && guide.claims.length > 0 && (
             <div className="cyber-panel rounded-xl p-5 text-xs">
-              <h3 className="font-display font-bold text-white mb-3">Consequential Claims Audit</h3>
-              <div className="space-y-2.5">
-                {guide.claims.map((c) => (
-                  <div key={c.id} className="p-3 rounded-lg bg-[#0A0F0D] border border-[#1B382B]">
-                    <p className="font-medium text-[#D1E7DD]">"{c.statement}"</p>
-                    <div className="mt-1.5 flex items-center gap-2 text-[10px] text-[#7C988B] font-mono">
-                      <span>Evidence: <strong className="text-[#00F29D]">{c.evidenceClass}</strong></span>
-                      <span>•</span>
-                      <span>Applies to: {c.applicability}</span>
+              <h3 className="font-display font-bold text-white mb-3">Audited Claims & Grounding Proof</h3>
+              <div className="space-y-3">
+                {guide.claims.map((c) => {
+                  const linkedSources = guide.sources.filter(s => c.sourceIds?.includes(s.id));
+                  return (
+                    <div key={c.id} className="p-3.5 rounded-lg bg-[#0A0F0D] border border-[#1B382B] space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-medium text-[#D1E7DD] text-xs">"{c.statement}"</p>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase shrink-0 ${
+                          c.validationStatus === 'verified'
+                            ? 'bg-[#00F29D]/15 text-[#00F29D] border border-[#00F29D]/30'
+                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        }`}>
+                          {c.validationStatus || 'verified'}
+                        </span>
+                      </div>
+
+                      {c.validationNote && (
+                        <div className="text-[11px] text-[#7C988B] font-mono">
+                          Audit Note: <span className="text-[#D1E7DD]">{c.validationNote}</span>
+                        </div>
+                      )}
+
+                      {c.uncertaintyNote && (
+                        <div className="text-[11px] text-amber-400 font-mono">
+                          Remaining Uncertainty: {c.uncertaintyNote}
+                        </div>
+                      )}
+
+                      {linkedSources.length > 0 && (
+                        <div className="pt-2 border-t border-[#1B382B]/60 flex flex-wrap gap-2 text-[10px] font-mono">
+                          <span className="text-[#7C988B]">Cited Sources:</span>
+                          {linkedSources.map(ls => (
+                            <a
+                              key={ls.id}
+                              href={ls.canonicalUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#00E5FF] hover:underline flex items-center gap-1"
+                            >
+                              <span>{ls.title}</span>
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

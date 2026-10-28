@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { repository } from './storage.js';
 import { inspectComposioToolkit } from './composioCatalog.js';
 import { getProviderGrounding } from './providerGrounding.js';
+import { validateEvidenceContract } from './evidenceValidator.js';
 import { 
   Guide, 
   ResearchJob, 
@@ -41,6 +42,36 @@ function isQuotaOrRateLimitError(err: any): boolean {
     err?.status === 429 ||
     err?.code === 429
   );
+}
+
+// Bounded SSRF check for user-supplied URLs
+export function isSafePublicUrl(urlStr: string): { safe: boolean; error?: string } {
+  try {
+    const parsed = new URL(urlStr);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return { safe: false, error: 'Only http and https protocols are permitted.' };
+    }
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '::1' ||
+      host.endsWith('.local') ||
+      host.endsWith('.internal') ||
+      host === 'metadata.google.internal' ||
+      host === '169.254.169.254'
+    ) {
+      return { safe: false, error: 'Internal, private, and link-local addresses are restricted.' };
+    }
+    // Check RFC1918 private IPv4 patterns
+    if (/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
+      return { safe: false, error: 'Private network IP ranges are restricted.' };
+    }
+    return { safe: true };
+  } catch (e: any) {
+    return { safe: false, error: 'Malformed URL.' };
+  }
 }
 
 async function callModelWithRetry(ai: any, params: any, maxRetries = 2): Promise<any> {
@@ -94,37 +125,47 @@ export async function runResearchJob(jobId: string): Promise<void> {
     updateStage(
       'resolve_identity',
       'Resolving Provider Identity',
-      `Investigating provider input: "${job.providerInput}". Determining canonical website and developer portal.`
+      `Investigating provider input: "${job.providerInput}". Determining canonical identity and developer portal.`
     );
 
-    let cleanProvider = job.providerInput.trim();
-    let providerName = cleanProvider;
-    let providerWebsite = job.websiteInput || '';
+    const cleanInput = job.providerInput.trim().replace(/[\r\n\t]/g, ' ').slice(0, 100);
+    const slug = cleanInput.toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'unknown-provider';
+    let providerName = cleanInput;
+    let providerWebsite = '';
+
+    // Validate website input if supplied
+    if (job.websiteInput) {
+      const urlCheck = isSafePublicUrl(job.websiteInput);
+      if (urlCheck.safe) {
+        providerWebsite = job.websiteInput.trim();
+      } else {
+        console.warn(`Unsafe or invalid website input "${job.websiteInput}": ${urlCheck.error}`);
+      }
+    }
 
     // Check verified provider grounding knowledge
-    const grounding = getProviderGrounding(cleanProvider);
+    const grounding = getProviderGrounding(cleanInput);
 
     if (grounding) {
       providerName = grounding.providerName;
-      if (!providerWebsite || providerWebsite.includes('mastodon.com') || providerWebsite.includes('example.com')) {
+      if (!providerWebsite || providerWebsite.includes('example.com')) {
         providerWebsite = grounding.canonicalWebsite;
       }
     } else {
-      if (cleanProvider.startsWith('http://') || cleanProvider.startsWith('https://')) {
-        try {
-          const parsedUrl = new URL(cleanProvider);
-          providerWebsite = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
-          providerName = parsedUrl.hostname.replace('www.', '').split('.')[0];
-          providerName = providerName.charAt(0).toUpperCase() + providerName.slice(1);
-        } catch (e) {
-          // keep cleanProvider
+      if (cleanInput.startsWith('http://') || cleanInput.startsWith('https://')) {
+        const urlCheck = isSafePublicUrl(cleanInput);
+        if (urlCheck.safe) {
+          try {
+            const parsedUrl = new URL(cleanInput);
+            providerWebsite = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
+            providerName = parsedUrl.hostname.replace(/^www\./, '').split('.')[0];
+            providerName = providerName.charAt(0).toUpperCase() + providerName.slice(1);
+          } catch {
+            providerName = cleanInput;
+          }
         }
       } else {
-        providerName = cleanProvider.charAt(0).toUpperCase() + cleanProvider.slice(1);
-        // Do not fabricate an unverified name.com
-        if (!providerWebsite) {
-          providerWebsite = '';
-        }
+        providerName = cleanInput.charAt(0).toUpperCase() + cleanInput.slice(1);
       }
     }
 
@@ -138,18 +179,32 @@ export async function runResearchJob(jobId: string): Promise<void> {
     const composioInspection = await inspectComposioToolkit(providerName);
     const toolkitMatch = composioInspection.toolkit;
 
-    if (toolkitMatch && toolkitMatch.found) {
+    if (composioInspection.outcome === 'confirmed_available' && toolkitMatch) {
       updateStage(
         'check_composio',
-        `Found Composio Toolkit: ${toolkitMatch.name}`,
-        `Managed OAuth status: ${toolkitMatch.managedAuthAvailable}. Auth method: ${toolkitMatch.relevantAuthMethod}. Provenance: ${composioInspection.retrievalProvenance}`,
+        `Confirmed Composio Toolkit: ${toolkitMatch.name}`,
+        `Managed OAuth is confirmed available. Auth mode: ${toolkitMatch.relevantAuthMethod}. Provenance: ${composioInspection.retrievalProvenance}`,
         toolkitMatch.docUrl
       );
-    } else if (toolkitMatch && toolkitMatch.managedAuthAvailable === 'unknown') {
+    } else if (composioInspection.outcome === 'confirmed_unavailable' && toolkitMatch) {
       updateStage(
         'check_composio',
-        `Composio Toolkit Status Uncertain`,
-        `Documentation check attempted but connection was inconclusive. Provenance: ${composioInspection.retrievalProvenance}`
+        `Composio Toolkit Found: Managed OAuth Not Available`,
+        `Documentation explicitly states managed OAuth is unavailable for ${toolkitMatch.name}. Custom OAuth app credentials required.`,
+        toolkitMatch.docUrl
+      );
+    } else if (composioInspection.outcome === 'ambiguous_config' && toolkitMatch) {
+      updateStage(
+        'check_composio',
+        `Composio Toolkit Identified: Managed Auth Ambiguous`,
+        `Toolkit documentation inspected, but does not explicitly document whether a default managed OAuth app is available. Treated as unverified.`,
+        toolkitMatch.docUrl
+      );
+    } else if (composioInspection.outcome === 'network_error') {
+      updateStage(
+        'check_composio',
+        `Composio Catalog Check Inconclusive (Network Issue)`,
+        `Could not reach Composio documentation service (${composioInspection.errorDetail || 'network failure'}). Availability treated as unknown.`
       );
     } else {
       updateStage(
@@ -163,7 +218,7 @@ export async function runResearchJob(jobId: string): Promise<void> {
     updateStage(
       'read_provider_requirements',
       'Investigating Provider Developer Portal & OAuth Specifications',
-      `Retrieving official developer documentation for ${providerName} OAuth 2.0 registration, required scopes, and review policies.`
+      `Retrieving official developer documentation for ${providerName} OAuth registration, scopes, and review policies.`
     );
 
     const discoveredSources: Source[] = [];
@@ -178,7 +233,7 @@ export async function runResearchJob(jobId: string): Promise<void> {
         retrievalMethod: toolkitMatch.metadataStatus === 'api_checked' ? 'metadata_api' : 'direct_fetch',
         retrievalStatus: 'retrieved',
         retrievedAt: new Date().toISOString(),
-        summary: `Documented actions: ${toolkitMatch.supportedActionsSummary.join(', ')}`,
+        summary: `Documented actions: ${toolkitMatch.supportedActionsSummary.join(', ') || 'No explicit actions extracted.'}`,
       });
     }
 
@@ -190,36 +245,30 @@ export async function runResearchJob(jobId: string): Promise<void> {
           title: src.title,
           canonicalUrl: src.url,
           sourceType: 'provider_docs',
-          retrievalMethod: 'direct_fetch',
-          retrievalStatus: 'retrieved',
-          retrievedAt: new Date().toISOString(),
+          retrievalMethod: 'verified_doc_archive',
+          retrievalStatus: 'cached',
+          retrievedAt: '2026-10-20T01:00:00Z',
           summary: src.summary,
         });
       });
     }
 
     const ai = getAiClient();
-    let rawResearchSummary = '';
+    let searchCitationsFound = false;
 
-    if (ai) {
+    if (ai && !grounding) {
       try {
-        let groundingContext = '';
-        if (grounding) {
-          groundingContext = `Known official provider specifications:\n- Developer Portal: ${grounding.developerPortalUrl}\n- Quota/Tier rules: ${grounding.startingPathRule.quotaModesOrTiers}\n- Official doc URLs: ${grounding.officialDocSources.map(s => s.url).join(', ')}`;
-        }
-
-        const searchPrompt = `You are an expert integration engineer researching OAuth 2.0 registration and approval requirements for "${providerName}" (website: ${providerWebsite || 'decentralized/per-instance'}).
+        const searchPrompt = `You are an integration research engineer reviewing OAuth 2.0 registration and approval requirements for "${providerName}".
 Intended Agent Actions: "${job.assumptions.intendedActions}"
 Audience: ${job.assumptions.audience}
-Custom Branding Needed: ${job.assumptions.customBrandingRequired ? 'Yes' : 'No'}
-${groundingContext}
+Custom Branding: ${job.assumptions.customBrandingRequired ? 'Yes' : 'No'}
 
-Investigate and report official documentation details:
-1. Exact OAuth app registration workflow and portal URL.
-2. Required OAuth scopes for: "${job.assumptions.intendedActions}".
-3. Approval and review requirements (app review, quota modes, verification).
-4. Timelines: Use "Unknown" if timeline is variable or undocumented in official guides.
-5. Common developer blockers, quota limits, and AI/policy constraints.`;
+Report official facts from primary developer documentation:
+1. Exact OAuth 2.0 app registration portal URL.
+2. Exact official OAuth scopes for "${job.assumptions.intendedActions}". If scopes cannot be verified from official provider documentation, state "Unverified".
+3. Approval and review requirements (app review, quota tiers, verification).
+4. Review timelines: Report "Unknown" if no official SLA is published. Do not fabricate timelines.
+5. Common developer blockers and rate limits.`;
 
         let searchRes: any;
         try {
@@ -231,48 +280,54 @@ Investigate and report official documentation details:
             },
           });
         } catch (searchToolErr: any) {
-          console.warn('Google Search tool error, falling back to direct Gemini generation:', searchToolErr?.message || searchToolErr);
+          console.warn('Google Search tool error, attempting direct Gemini call:', searchToolErr?.message || searchToolErr);
           searchRes = await callModelWithRetry(ai, {
             model: 'gemini-3.8-flash',
             contents: searchPrompt,
           });
         }
 
-        rawResearchSummary = searchRes.text || '';
-
-        // Extract search grounding citations
-        const searchChunks = searchRes.candidates?.[0]?.groundingMetadata?.groundingChunks;
-        if (Array.isArray(searchChunks)) {
+        const searchChunks = searchRes?.candidates?.[0]?.groundingMetadata?.groundingChunks;
+        if (Array.isArray(searchChunks) && searchChunks.length > 0) {
           searchChunks.forEach((chunk: any, i: number) => {
             if (chunk.web?.uri) {
-              discoveredSources.push({
-                id: `src-web-${i + 1}`,
-                title: chunk.web.title || `${providerName} Official Documentation`,
-                canonicalUrl: chunk.web.uri,
-                sourceType: 'provider_docs',
-                retrievalMethod: 'gemini_search_grounding',
-                retrievalStatus: 'retrieved',
-                retrievedAt: new Date().toISOString(),
-                summary: chunk.web.title,
-              });
+              const urlCheck = isSafePublicUrl(chunk.web.uri);
+              if (urlCheck.safe) {
+                searchCitationsFound = true;
+                discoveredSources.push({
+                  id: `src-web-${i + 1}`,
+                  title: chunk.web.title || `${providerName} Official Documentation`,
+                  canonicalUrl: chunk.web.uri,
+                  sourceType: 'provider_docs',
+                  retrievalMethod: 'gemini_search_grounding',
+                  retrievalStatus: 'retrieved',
+                  retrievedAt: new Date().toISOString(),
+                  summary: chunk.web.title,
+                });
+              }
             }
           });
         }
       } catch (e: any) {
         if (isQuotaOrRateLimitError(e)) {
-          if (!grounding) {
-            throw new Error(`Gemini API rate limit or quota exceeded (429 RESOURCE_EXHAUSTED). To prevent fabricating ungrounded guidance, investigation has halted. Please retry once quota resets.`);
-          }
-          console.warn(`Gemini research quota reached (429). Using verified official documentation archive for ${providerName}.`);
+          console.warn(`Gemini research quota reached (429) for ${providerName}.`);
         } else {
           console.warn('Gemini research query error:', e?.message || e);
-          if (!grounding) {
-            throw new Error(`Provider documentation search failed: ${e?.message || 'Unknown model error'}`);
-          }
         }
       }
-    } else if (!grounding) {
-      throw new Error('Server environment variable GEMINI_RESEARCH_API_KEY is not configured and no cached grounding exists for this provider.');
+    }
+
+    if (discoveredSources.length === 0) {
+      discoveredSources.push({
+        id: `src-unverified-${slug}`,
+        title: `Pending Official Documentation for ${providerName}`,
+        canonicalUrl: providerWebsite || `https://www.google.com/search?q=${encodeURIComponent(providerName + ' developer portal oauth')}`,
+        sourceType: 'secondary_source',
+        retrievalMethod: 'manual_curation',
+        retrievalStatus: 'not_attempted',
+        retrievedAt: null,
+        summary: `Primary official documentation has not yet been retrieved or verified for ${providerName}. Developer verification required.`,
+      });
     }
 
     job.sourcesDiscovered = discoveredSources;
@@ -282,12 +337,15 @@ Investigate and report official documentation details:
     updateStage(
       'assess_oauth_path',
       'Evaluating Composio-Managed vs Owned App Path',
-      `Synthesizing evidence against developer brief: custom branding=${job.assumptions.customBrandingRequired}, audience=${job.assumptions.audience}.`
+      `Evaluating evidence against developer brief: custom branding=${job.assumptions.customBrandingRequired}, audience=${job.assumptions.audience}.`
     );
 
     let startingPath: StartingPath = 'register_owned_app';
     let pathHeadline = '';
     let pathWhy = '';
+    let canStartTestingStatus: 'yes' | 'with_limitations' | 'blocked' = 'yes';
+    let canStartTestingNote = '';
+    let isUnverifiedProvider = false;
 
     // Check Strava Policy 5.3 AI blocker
     const isStravaAiBlocked = 
@@ -298,36 +356,50 @@ Investigate and report official documentation details:
       startingPath = 'register_owned_app';
       pathHeadline = 'Blocked by Policy: Strava Section 5.3 Restricts AI Applications with API Data';
       pathWhy = 'Under Strava API Policy (June 2026) Section 5.3, developers are strictly prohibited from using Strava API data to operate AI applications, LLM context grounding, RAG pipelines, or training summaries for external customers. Athlete OAuth consent does not waive this restriction. Section 3.5 permits MCP integrations only for personal single-user workflows.';
-    } else if (!toolkitMatch || !toolkitMatch.found) {
-      startingPath = 'provider_not_found_in_composio';
-      pathHeadline = 'Provider not found in Composio (Direct Provider OAuth Required)';
-      pathWhy = `Composio does not have a pre-built toolkit for ${providerName}. Connecting this app requires registering an owned OAuth app directly in ${providerName}'s developer portal or using decentralized dynamic registration.`;
-    } else if (job.assumptions.customBrandingRequired) {
-      startingPath = 'register_owned_app';
-      pathHeadline = `Register your own OAuth App (Custom Branding Required)`;
-      pathWhy = `Because your customers need to see your product name and logo on the ${providerName} authorization screen, Composio-managed OAuth is not suitable. You must register an owned OAuth app in ${providerName}'s developer portal and configure your client credentials in Composio.`;
-    } else if (toolkitMatch.managedAuthAvailable === 'unavailable') {
-      startingPath = 'register_owned_app';
-      pathHeadline = `Register your own OAuth App (Composio-Managed OAuth Not Available)`;
-      pathWhy = `Composio documentation explicitly notes that managed OAuth is not available for ${providerName}. You must register an owned OAuth app in ${providerName}'s developer portal and configure custom credentials in Composio.`;
-    } else if (toolkitMatch.managedAuthAvailable === 'available') {
+      canStartTestingStatus = 'blocked';
+      canStartTestingNote = 'Blocked for external multi-customer AI features under Strava API Policy Section 5.3. Permitted only for personal single-user MCP workflows under Section 3.5.';
+    } else if (grounding) {
+      // Known grounded provider
+      if (toolkitMatch?.managedAuthAvailable === 'available' && !job.assumptions.customBrandingRequired) {
+        startingPath = 'composio_managed_suitable';
+        pathHeadline = 'Composio-managed OAuth appears suitable for development and initial rollout';
+        pathWhy = `Composio provides a managed OAuth app for ${providerName}. You can test and connect without registering a custom developer app, provided Composio's consent screen branding is acceptable.`;
+        canStartTestingStatus = 'yes';
+        canStartTestingNote = `You can test immediately with Composio managed OAuth in your development environment.`;
+      } else {
+        startingPath = 'register_owned_app';
+        pathHeadline = job.assumptions.customBrandingRequired
+          ? `Register your own OAuth App (Custom Branding Required)`
+          : `Register your own OAuth App (${grounding.startingPathRule.managedAuthNote || 'Owned App Required'})`;
+        pathWhy = job.assumptions.customBrandingRequired
+          ? `Because your customers need to see your product name and logo on the ${providerName} authorization screen, Composio-managed OAuth is not suitable. You must register an owned OAuth app in ${providerName}'s developer portal.`
+          : `Composio managed OAuth is not available or suitable for ${providerName}. Register an owned app in the ${providerName} developer portal.`;
+        canStartTestingStatus = 'yes';
+        canStartTestingNote = `You can register a test OAuth app in ${providerName} Developer Portal and begin sandbox testing.`;
+      }
+    } else if (toolkitMatch && toolkitMatch.managedAuthAvailable === 'available' && !job.assumptions.customBrandingRequired) {
       startingPath = 'composio_managed_suitable';
       pathHeadline = `Composio-managed OAuth appears suitable for development and initial rollout`;
       pathWhy = `Composio provides a managed OAuth app for ${providerName} that supports the standard actions required. You can test and connect without registering a custom developer app, provided Composio's consent screen branding is acceptable.`;
+      canStartTestingStatus = 'yes';
+      canStartTestingNote = 'You can test immediately with Composio managed OAuth in your development environment.';
     } else {
-      startingPath = 'register_owned_app';
-      pathHeadline = `Register your own OAuth App`;
-      pathWhy = `Managed OAuth status is unverified or unavailable. Register an owned provider OAuth app in ${providerName}'s developer portal.`;
+      // Unfamiliar or unverified provider: DO NOT guess!
+      isUnverifiedProvider = true;
+      startingPath = 'unverified_provider_requirements';
+      pathHeadline = `Provider-Specific OAuth Requirements Not Yet Verified`;
+      pathWhy = `We could not safely determine the required scopes, app registration rules, or approval process for "${providerName}" from available evidence. Review provider developer documentation before implementation.`;
+      canStartTestingStatus = 'with_limitations';
+      canStartTestingNote = `Unverified: Determine whether ${providerName} offers a developer sandbox or requires formal business verification before testing.`;
     }
 
-    // Stage 5: Build Guide (Synthesize structured guide)
+    // Stage 5: Build Guide
     updateStage(
       'build_guide',
       'Synthesizing Structured Setup & Approval Guide',
       `Compiling prerequisites, granular permission mappings, step-by-step checklist, blockers, and recovery paths.`
     );
 
-    const slug = cleanProvider.toLowerCase().replace(/[^a-z0-9_-]/g, '');
     const guideId = `${slug}-guide-v1`;
 
     const validImplications: PermissionItem['reviewImplication'][] = [
@@ -335,90 +407,119 @@ Investigate and report official documentation details:
       'Sensitive scope / verification required',
       'Restricted scope / security audit (CASA)',
       'Partner approval / product application required',
-      'Standard user consent'
+      'Standard user consent',
+      'Unknown / unverified'
     ];
 
-    let guidePermissions: PermissionItem[] = grounding?.recommendedScopes
-      ? grounding.recommendedScopes.map(s => ({
-          ...s,
-          reviewImplication: (validImplications.includes(s.reviewImplication as any)
-            ? s.reviewImplication
-            : 'Non-sensitive / instant') as PermissionItem['reviewImplication'],
-          sourceIds: discoveredSources.map(src => src.id).slice(0, 2),
-        }))
-      : [
-          {
-            feature: `Core integration: ${job.assumptions.intendedActions}`,
-            permission: `${slug}.read, ${slug}.write`,
-            whyNeeded: `Enables AI agent to execute: ${job.assumptions.intendedActions}`,
-            providerProductRequirement: `Standard ${providerName} Web API`,
-            reviewImplication: 'Non-sensitive / instant',
-            sourceIds: discoveredSources.map(s => s.id).slice(0, 2),
-            uncertainty: 'Confirm specific scope strings against provider developer portal documentation.',
-          },
-        ];
+    let guidePermissions: PermissionItem[] = [];
+
+    if (grounding?.recommendedScopes) {
+      guidePermissions = grounding.recommendedScopes.map(s => ({
+        ...s,
+        reviewImplication: (validImplications.includes(s.reviewImplication as any)
+          ? s.reviewImplication
+          : 'Non-sensitive / instant') as PermissionItem['reviewImplication'],
+        evidenceStatus: 'verified_official',
+        isConfirmedScope: true,
+        sourceIds: discoveredSources.map(src => src.id).slice(0, 2),
+      }));
+    } else {
+      // Unfamiliar provider: NEVER invent fake scopes or assume "Non-sensitive / instant"
+      guidePermissions = [
+        {
+          feature: `Intended integration: ${job.assumptions.intendedActions}`,
+          permission: 'Pending developer portal confirmation',
+          whyNeeded: `Feature requires provider authorization, but exact scope strings have not been verified from official documentation.`,
+          providerProductRequirement: `Verify required API products in ${providerName} Developer Portal`,
+          reviewImplication: 'Unknown / unverified',
+          evidenceStatus: 'unknown_not_documented',
+          isConfirmedScope: false,
+          sourceIds: discoveredSources.map(s => s.id).slice(0, 1),
+          uncertainty: `Provider-specific OAuth scope strings for "${providerName}" could not be safely confirmed from available documentation. Inspect the provider's official scope directory before implementation.`
+        }
+      ];
+    }
 
     let guideBlockers: Blocker[] = grounding?.blockers
-      ? grounding.blockers.map(b => ({
-          ...b,
-          isHypothesis: false,
-        }))
+      ? grounding.blockers.map(b => ({ ...b, isHypothesis: false }))
       : [
           {
-            symptom: 'OAuth redirect returns redirect_uri_mismatch error',
-            checks: ['Verify the exact redirect URI entered in provider portal.'],
-            explanationOrHypothesis: 'Provider requires exact character match with the URL generated by Composio.',
+            symptom: 'OAuth redirect returns redirect_uri_mismatch or invalid_client error',
+            checks: [
+              'Verify the exact redirect URI entered in the provider developer console.',
+              'Confirm that the Client ID and Secret were copied into Composio auth settings without trailing whitespace.'
+            ],
+            explanationOrHypothesis: 'Provider OAuth servers enforce exact character matching on authorized redirect URIs.',
             isHypothesis: false,
-            nextAction: 'Copy the exact Redirect URI from your Composio auth configuration and update the provider portal.',
-            humanHandoff: 'Developer updates portal settings.',
+            nextAction: 'Copy the exact Redirect URI from your Composio auth configuration dashboard and update the provider portal.',
+            humanHandoff: 'Developer updates portal settings.'
           },
+          {
+            symptom: 'Authorization fails with "Access not approved" or "Unverified App" warning',
+            checks: [
+              'Check whether provider requires organizational verification, domain verification, or manual partner review.',
+              'Verify if end-user is in the approved test user whitelist.'
+            ],
+            explanationOrHypothesis: 'Many providers block authorization for unverified third-party applications.',
+            isHypothesis: false,
+            nextAction: 'Review provider verification guidelines and submit required app details or add test user accounts.',
+            humanHandoff: 'Developer or compliance team submits provider verification form.'
+          }
         ];
 
     let approvalAndDist = grounding?.keyFacts || {
-      appRegistration: `Self-service registration in ${providerName} Developer Portal. Instant.`,
-      apiProductAccessApproval: 'Standard Web API access enabled upon app registration.',
-      providerVerification: job.assumptions.audience === 'external_customers'
-        ? `Verification or review may be required before making app public to external tenants.`
-        : 'Not required for team-only or internal testing.',
-      marketplaceDistribution: 'Optional public directory listing.',
-      customerAdminApproval: 'Workspace administrators may need to approve the third-party connection.',
-      endUserConsent: 'End-user authorization dialog showing requested permissions and registered app details.',
+      appRegistration: isUnverifiedProvider
+        ? `Locate the official ${providerName} Developer Portal to check registration requirements.`
+        : `Self-service registration in ${providerName} Developer Portal.`,
+      apiProductAccessApproval: isUnverifiedProvider
+        ? 'Approval requirements not yet verified. Review provider developer policies.'
+        : 'Standard Web API access enabled upon app registration.',
+      providerVerification: isUnverifiedProvider
+        ? 'Unknown / not verified from official documentation.'
+        : (job.assumptions.audience === 'external_customers'
+            ? 'Verification or review may be required before making app public to external customers.'
+            : 'Not required for team-only or internal testing.'),
+      marketplaceDistribution: 'Unknown / optional public directory listing.',
+      customerAdminApproval: 'Workspace or tenant administrators may need to approve the integration depending on enterprise policy.',
+      endUserConsent: 'End-user authorization dialog showing requested permissions and registered app details.'
     };
 
     let guideSteps: ChecklistStep[] = [
       {
         id: `${slug}-step-1`,
-        action: `Review Authentication Requirements & Launch Constraints`,
+        action: `Identify Official Developer Portal & Review Launch Constraints`,
         owner: 'developer',
         prerequisites: ['Product feature spec'],
-        completionCondition: 'Decided on authentication approach.',
+        completionCondition: 'Decided on authentication approach and confirmed portal URL.',
         sourceIds: discoveredSources.map(s => s.id).slice(0, 1),
-        evidenceStatus: 'source_backed',
-        estimate: { duration: '10 min', basis: 'Product decision' },
+        evidenceStatus: grounding ? 'source_backed' : 'unverified',
+        estimate: { duration: '15 min', basis: 'Portal documentation review' },
         phase: 'composio_prep',
         details: isStravaAiBlocked
           ? 'CRITICAL: Strava Policy Section 5.3 restricts AI models and summary generation on API data for external customers. Verify legal compliance before proceeding.'
-          : 'Review branding, rate limits, and quota mode implications.',
+          : (isUnverifiedProvider
+              ? `Locate ${providerName}'s official developer portal and review OAuth documentation before writing code.`
+              : `Review branding, rate limits, and quota mode implications for ${providerName}.`)
       },
       {
         id: `${slug}-step-2`,
         action: grounding?.slug === 'mastodon'
           ? 'Configure Dynamic Client Registration (POST /api/v1/apps) or Instance App'
-          : `Register OAuth 2.0 Application in ${providerName} Developer Portal`,
+          : `Register OAuth Application in ${providerName} Developer Console`,
         owner: 'developer',
         prerequisites: [`${providerName} developer access`],
         completionCondition: 'Client credentials generated or dynamic registration implemented.',
         sourceIds: discoveredSources.map(s => s.id).slice(0, 2),
-        evidenceStatus: 'source_backed',
+        evidenceStatus: grounding ? 'source_backed' : 'unverified',
         estimate: { duration: '20 min', basis: 'Portal form submission or API call' },
         phase: 'provider_registration',
         details: grounding?.slug === 'mastodon'
           ? 'Call POST /api/v1/apps on the target Mastodon instance with client_name and redirect_uris.'
-          : `Access the ${providerName} developer portal (${grounding?.developerPortalUrl || 'developer console'}) and register your application.`,
+          : `Access the ${providerName} developer portal (${grounding?.developerPortalUrl || 'official developer console'}) and register your application.`
       },
       {
         id: `${slug}-step-3`,
-        action: `Configure Redirect URI in Provider Settings`,
+        action: `Configure Authorized Redirect URI`,
         owner: 'developer',
         prerequisites: ['App created in portal'],
         completionCondition: 'Redirect URI saved in provider OAuth settings.',
@@ -426,7 +527,7 @@ Investigate and report official documentation details:
         evidenceStatus: 'source_backed',
         estimate: { duration: '5 min', basis: 'OAuth configuration' },
         phase: 'access_configuration',
-        details: 'Copy the Redirect URI from your Composio auth configuration and add it to Authorized Redirect URIs in your provider console.',
+        details: 'Copy the Redirect URI from your Composio auth configuration and add it to Authorized Redirect URIs in your provider console.'
       },
       {
         id: `${slug}-step-4`,
@@ -438,7 +539,7 @@ Investigate and report official documentation details:
         evidenceStatus: 'source_backed',
         estimate: { duration: '5 min', basis: 'Dashboard field entry' },
         phase: 'composio_prep',
-        details: 'Enter your Client ID and Client Secret in Composio custom app settings, and note your Auth Config ID.',
+        details: 'Enter your Client ID and Client Secret in Composio custom app settings, and note your Auth Config ID.'
       },
       {
         id: `${slug}-step-5`,
@@ -452,18 +553,18 @@ Investigate and report official documentation details:
         phase: 'testing_and_launch',
         details: isStravaAiBlocked
           ? 'Note: Test connections must remain within Section 3.5 personal developer workflows.'
-          : 'Connect an account and verify that agent actions return expected data.',
-      },
+          : 'Connect an account and verify that agent actions return expected data.'
+      }
     ];
 
     // Stage 6: Check Evidence & Contract
     updateStage(
       'check_evidence',
       'Verifying Evidence Contract & Claim Citations',
-      `Validating claims against official provider policies and Composio documentation.`
+      `Validating claims, referential integrity, and source citations.`
     );
 
-    const claims: Claim[] = [
+    const initialClaims: Claim[] = [
       {
         id: `cl-${slug}-1`,
         statement: toolkitMatch && toolkitMatch.found
@@ -477,15 +578,26 @@ Investigate and report official documentation details:
         id: `cl-${slug}-2`,
         statement: isStravaAiBlocked
           ? 'Strava API Policy Section 5.3 restricts operating AI applications with API data for external customers; Section 3.5 MCP exception is personal-use only.'
-          : `${providerName} requires an OAuth 2.0 client registered in its developer portal for customized brand consent and owned quota control.`,
-        applicability: isStravaAiBlocked ? 'Legal policy compliance.' : 'Production deployments requiring custom branding.',
+          : (grounding
+              ? `${providerName} requires an OAuth 2.0 client registered in its developer portal for customized brand consent and owned quota control.`
+              : `Provider-specific OAuth requirements have not yet been verified from primary official documentation for ${providerName}.`),
+        applicability: isStravaAiBlocked ? 'Legal policy compliance.' : 'Production deployment planning.',
         sourceIds: discoveredSources.map(s => s.id).slice(0, 2),
-        evidenceClass: 'provider_documentation',
-      },
+        evidenceClass: grounding ? 'provider_documentation' : 'unverified',
+        uncertaintyNote: grounding ? undefined : 'Unresolved requirements must be confirmed in provider developer console.'
+      }
     ];
 
-    // Compute external waiting honestly
-    let externalWaiting = 'Unknown';
+    // Run deterministic evidence validation engine
+    const validationResult = validateEvidenceContract(
+      initialClaims,
+      discoveredSources,
+      guidePermissions,
+      guideSteps
+    );
+
+    // Compute external waiting honestly without fabricating SLAs
+    let externalWaiting = 'Not publicly specified';
     if (isStravaAiBlocked) {
       externalWaiting = 'Blocked by Policy - Strava Section 5.3 restricts AI models on API data for external customers.';
     } else if (grounding?.slug === 'mastodon') {
@@ -495,10 +607,12 @@ Investigate and report official documentation details:
     } else if (startingPath === 'composio_managed_suitable') {
       externalWaiting = 'Zero waiting with managed OAuth.';
     } else {
-      externalWaiting = 'Unknown - official documentation does not guarantee a fixed SLA; depends on provider review queue.';
+      externalWaiting = 'Not publicly specified - official review queues vary; inspect provider portal for published SLAs.';
     }
 
-    const developerEffort = grounding?.developerEffortEstimate || '1–2 hours for initial configuration and test connection.';
+    const developerEffort = grounding?.developerEffortEstimate || (isUnverifiedProvider
+      ? '1–3 hours for portal investigation, credential setup, and test connection.'
+      : '1–2 hours for initial configuration and test connection.');
 
     const limitations: string[] = [];
     if (isStravaAiBlocked) {
@@ -522,9 +636,9 @@ Investigate and report official documentation details:
       }
     } else {
       limitations.push(
-        'Branding on consent screen is determined by OAuth client ownership.',
-        'Rate limits and API quotas apply to the registered client ID.',
-        'Users must grant permissions at authorization time.'
+        'Provider OAuth requirements have not been confirmed against primary official documentation.',
+        'Consent screen branding and approval requirements depend on provider app registration policies.',
+        'Verify required scopes and quotas in provider developer console before launching to customers.'
       );
     }
 
@@ -534,6 +648,8 @@ Investigate and report official documentation details:
       ? 'Implement Dynamic Client Registration (POST /api/v1/apps) on target user instances or enter instance client credentials.'
       : toolkitMatch?.managedAuthAvailable === 'available' && !job.assumptions.customBrandingRequired
       ? 'Connect via Composio Dashboard/SDK to validate your agent actions.'
+      : isUnverifiedProvider
+      ? `Locate ${providerName} official developer portal, review OAuth documentation, and verify required scope strings.`
       : `Register your OAuth app in ${providerName} Developer Portal (${grounding?.developerPortalUrl || 'developer portal'}) and configure your Composio redirect URI.`;
 
     const guide: Guide = {
@@ -548,25 +664,23 @@ Investigate and report official documentation details:
         ? 'limitation_found'
         : (toolkitMatch?.managedAuthAvailable === 'available' && !job.assumptions.customBrandingRequired 
             ? 'supported_by_evidence' 
-            : 'limitation_found'),
+            : (isUnverifiedProvider ? 'unknown' : 'limitation_found')),
       pathAssessment: {
         startingPath,
         headline: pathHeadline,
         why: pathWhy,
         assumptions: job.assumptions,
         canStartTesting: {
-          status: isStravaAiBlocked ? 'blocked' : 'yes',
-          note: isStravaAiBlocked
-            ? 'Blocked for external multi-customer AI features under Strava API Policy Section 5.3. Permitted only for personal single-user MCP workflows under Section 3.5.'
-            : (toolkitMatch?.managedAuthAvailable === 'available'
-                ? 'You can test immediately with Composio managed OAuth in your development environment.'
-                : `You can register a test OAuth app in ${providerName} Developer Portal and begin sandbox testing.`),
+          status: canStartTestingStatus,
+          note: canStartTestingNote,
         },
         whatCouldBlockLaunch: isStravaAiBlocked
           ? 'Strava API Policy Section 5.3 prohibition on AI models and data ingestion.'
-          : (job.assumptions.audience === 'external_customers'
-              ? `Provider review / verification requirements for public external traffic, or workspace administrator restrictions.`
-              : 'None expected for team-only usage.'),
+          : (isUnverifiedProvider
+              ? 'Unverified provider approval queues, partner restrictions, or lack of public OAuth APIs.'
+              : (job.assumptions.audience === 'external_customers'
+                  ? `Provider review / verification requirements for public external traffic, or workspace administrator restrictions.`
+                  : 'None expected for team-only usage.')),
         developerEffort,
         externalWaiting,
         myNextAction,
@@ -597,8 +711,8 @@ Investigate and report official documentation details:
           ],
         },
       ],
-      permissionsTable: guidePermissions,
-      setupChecklist: guideSteps,
+      permissionsTable: validationResult.validatedPermissions,
+      setupChecklist: validationResult.validatedSteps,
       approvalAndDistribution: approvalAndDist,
       blockersAndRecovery: guideBlockers,
       evidenceAndUnknowns: {
@@ -608,12 +722,21 @@ Investigate and report official documentation details:
         communityReports: [],
         estimates: [developerEffort],
         setupAttempts: [],
-        unresolvedAssumptions: [
-          'Whether your target customers enforce strict enterprise SSO integration policies.',
-        ],
+        unresolvedAssumptions: isUnverifiedProvider
+          ? [
+              'Official OAuth 2.0 scope strings required for intended actions.',
+              'Provider review SLA and public distribution requirements.',
+              'Whether provider supports self-service app creation or requires partner application.'
+            ]
+          : ['Whether your target customers enforce strict enterprise SSO integration policies.'],
       },
       sources: discoveredSources,
-      claims,
+      claims: validationResult.validatedClaims,
+      evidenceValidation: validationResult.summary,
+      isPartialResearch: isUnverifiedProvider || validationResult.summary.claimsRequiringReview > 0,
+      unverifiedNotice: isUnverifiedProvider
+        ? 'Provider-specific OAuth requirements have not yet been verified from primary official documentation. We could not safely determine the required scopes or approval process from the available evidence.'
+        : undefined,
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
     };
@@ -658,7 +781,9 @@ ${guidePermissions.map(p => `- **\`${p.permission}\`**: ${p.whyNeeded}`).join('\
         'Local checklist marks your personal progress on this device and does not certify provider approval.',
         isStravaAiBlocked
           ? 'CRITICAL LEGAL WARNING: Strava API Policy Section 5.3 restricts multi-customer AI applications. Review legal terms before launching.'
-          : 'Review provider rate limits before launching to external customers.',
+          : (isUnverifiedProvider
+              ? 'Requirements remain unverified from primary documentation. Confirm scope names and review policies in provider portal.'
+              : 'Review provider rate limits before launching to external customers.'),
       ],
     };
 
@@ -670,7 +795,7 @@ ${guidePermissions.map(p => `- **\`${p.permission}\`**: ${p.whyNeeded}`).join('\
     updateStage(
       'completed',
       'Research Complete & Shareable Guide Published',
-      `Guide successfully synthesized with ${discoveredSources.length} sources and ${claims.length} verified claims.`
+      `Guide synthesized with ${discoveredSources.length} source(s), ${validationResult.summary.verifiedClaims} verified claim(s), and ${validationResult.summary.claimsRequiringReview} claim(s) flagged for human review.`
     );
   } catch (err: any) {
     console.error('Research job error:', err?.message || err);
@@ -679,7 +804,7 @@ ${guidePermissions.map(p => `- **\`${p.permission}\`**: ${p.whyNeeded}`).join('\
     updateStage(
       'failed',
       'Investigation Halted with Error Details',
-      `Error encountered: ${job.error}. Partial evidence gathered prior to failure is preserved. You can retry with your server key once quota is available.`
+      `Error encountered: ${job.error}. Partial evidence gathered prior to failure is preserved.`
     );
   }
 }
